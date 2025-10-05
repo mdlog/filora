@@ -1,5 +1,7 @@
 # Filora - Decentralized Digital Asset Marketplace
 
+> **Note:** This project is a fork of [FIL-Builders/fs-upload-dapp](https://github.com/FIL-Builders/fs-upload-dapp) with additional marketplace features, NFT licensing, and automated royalty distribution.
+
 Filora is a decentralized marketplace for buying, selling, and trading digital assets on the Filecoin blockchain. Built with Synapse SDK, Filora provides secure, permanent storage with NFT licensing and automated royalty distribution.
 
 ## Features
