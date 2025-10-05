@@ -5,9 +5,12 @@
 AssetRegistry adalah smart contract yang menyimpan metadata semua asset digital yang diupload ke marketplace. Contract ini memungkinkan:
 
 - ✅ Query efisien untuk semua asset di marketplace
-- ✅ Tracking owner, dataset ID, provider ID, dan CID
+- ✅ Tracking owner, dataset ID, provider ID, CID, dan price
 - ✅ Real-time updates saat asset baru diupload
 - ✅ Scalable untuk ribuan asset
+- ✅ On-chain price storage untuk setiap asset
+
+**Current Deployment:** `0x935f69f2A66FaF91004434aFc89f7180161db32d`
 
 ## Prerequisites
 
@@ -84,29 +87,32 @@ console.log("Total assets:", total.toString());
 
 ### Upload Flow
 
-1. User upload file via UI
+1. User upload file via UI dengan metadata (name, description, price, royalty)
 2. File disimpan ke Filecoin via Synapse SDK
-3. **Otomatis register asset ke AssetRegistry contract**
-4. Asset muncul di marketplace untuk semua user
+3. **Otomatis register asset ke AssetRegistry contract dengan price**
+4. Asset langsung muncul di marketplace untuk semua user dengan price
 
 ### Marketplace Flow
 
-1. Marketplace query `getActiveAssets()` dari contract
-2. Untuk setiap asset, fetch detail dari PDP server
-3. Display semua asset dengan gambar dan metadata
+1. Marketplace query `getActiveAssets()` dari contract (termasuk price)
+2. Display asset dengan gambar dari Filbeam CDN: `https://{owner}.calibration.filcdn.io/{CID}`
+3. Show price dan metadata untuk setiap asset
+4. Support pagination (15 items per page)
+5. Filter by provider dan status (Live/Inactive)
 
 ## Contract Functions
 
 ### Write Functions
 
-- `registerAsset(datasetId, providerId, pieceCid)` - Register asset baru
+- `registerAsset(datasetId, providerId, pieceCid, price)` - Register asset baru dengan price
 - `deactivateAsset(assetId)` - Nonaktifkan asset (owner only)
 
 ### Read Functions
 
-- `getActiveAssets()` - Get semua active assets
+- `getActiveAssets()` - Get semua active assets dengan price
 - `getTotalAssets()` - Get total jumlah assets
 - `getAssetsByOwner(address)` - Get assets by owner
+- `getAsset(assetId)` - Get detail asset by ID
 
 ## Benefits
 
@@ -125,8 +131,22 @@ console.log("Total assets:", total.toString());
 ## Gas Costs
 
 - Deploy contract: ~0.001 tFIL
-- Register asset: ~0.0001 tFIL per asset
+- Register asset with price: ~0.00015 tFIL per asset
 - Query assets: FREE (read-only)
+
+## Asset Data Structure
+
+```solidity
+struct Asset {
+    address owner;        // Asset owner address
+    uint256 datasetId;    // Filecoin dataset ID
+    uint256 providerId;   // Storage provider ID
+    string pieceCid;      // IPFS CID of the asset
+    uint256 price;        // Price in wei (USDFC)
+    uint256 timestamp;    // Upload timestamp
+    bool isActive;        // Active status
+}
+```
 
 ## Troubleshooting
 

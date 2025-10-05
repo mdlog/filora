@@ -48,7 +48,7 @@ export const useAllDatasets = () => {
               payer: asset.owner,
             };
             
-            console.log(`Adding asset from registry with pieceCid: ${asset.pieceCid}`);
+            console.log(`Adding asset from registry with pieceCid: ${asset.pieceCid}, price: ${asset.price}`);
             allClientDatasets.push({
               pdpVerifierDataSetId: asset.datasetId,
               providerId: asset.providerId,
@@ -58,6 +58,7 @@ export const useAllDatasets = () => {
               serviceURL,
               data: mockData as any,
               isLive: asset.isActive,
+              price: asset.price,
             } as DataSet);
           } catch (error) {
             console.error(`Failed to load asset from registry:`, error);

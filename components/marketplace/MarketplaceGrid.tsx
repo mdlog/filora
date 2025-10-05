@@ -46,6 +46,7 @@ export const MarketplaceGrid = () => {
       isLive: dataset.isLive ?? true,
       provider: dataset.provider?.name || "Unknown",
       owner: owner,
+      price: dataset.price,
     }));
   }) || [];
   
@@ -390,6 +391,12 @@ export const MarketplaceGrid = () => {
                           <span>🏢</span>
                           <span className="truncate">{asset.provider}</span>
                         </div>
+                        {asset.price !== undefined && asset.price > 0 && (
+                          <div className="flex items-center gap-2 text-xs">
+                            <span>💰</span>
+                            <span className="text-gray-800 font-bold">{(asset.price / 1e18).toFixed(2)} USDFC</span>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   ))}
@@ -458,6 +465,11 @@ export const MarketplaceGrid = () => {
                     />
                   )}
                   <span className="text-6xl relative z-10">🎨</span>
+                  {asset.price !== undefined && asset.price > 0 && (
+                    <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg z-20">
+                      <span className="text-sm font-bold text-indigo-600">{(asset.price / 1e18).toFixed(2)} USDFC</span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
@@ -488,6 +500,15 @@ export const MarketplaceGrid = () => {
                         <p className="text-gray-600 text-xs truncate">{asset.provider}</p>
                       </div>
                     </div>
+                    {asset.price !== undefined && asset.price > 0 && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-400">💰</span>
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-500">Price</p>
+                          <p className="text-gray-800 font-bold text-sm">{(asset.price / 1e18).toFixed(2)} USDFC</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-xl font-semibold text-center">
                     View Details

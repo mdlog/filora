@@ -21,6 +21,7 @@ Filora is a decentralized marketplace for buying, selling, and trading digital a
 - 💳 **Payment Processing** - USDFC payments with automatic royalty distribution
 - 🔍 **License Verification** - Real-time license status checking
 - 🤖 **Smart Contract Automation** - Automatic royalty distribution to creators
+- 📋 **AssetRegistry** - On-chain marketplace registry with price storage
 
 ## Prerequisites
 
@@ -84,15 +85,22 @@ Open [http://localhost:3000](http://localhost:3000)
 1. Navigate to **Marketplace** tab
 2. Switch between **Grid View** (all assets) or **By Owner** (grouped by user)
 3. Use search to filter by CID, Asset ID, or Provider
-4. Filter by status: All, Live, or Inactive
-5. Click asset to view details and preview via Filbeam CDN
+4. Filter by provider and status: All, Live, or Inactive
+5. View asset images via Filbeam CDN: `https://{owner}.calibration.filcdn.io/{CID}`
+6. Pagination: 15 assets per page
+7. Click asset to view details with price
 
 ### Upload Assets
 1. Go to **Upload Asset** tab
-2. Select file to upload
-3. Add metadata (name, description, price)
+2. Select file to upload (drag & drop or browse)
+3. Add metadata:
+   - Asset name
+   - Description
+   - Price (in USDFC)
+   - Royalty percentage (0-100%)
 4. Click "Upload to Filecoin"
 5. Confirm transaction in wallet
+6. Asset automatically registered to marketplace with price
 
 ### Purchase Assets
 
@@ -151,21 +159,23 @@ Filora uses Filecoin's PDP system for verifiable, persistent storage:
 
 > ✅ **Deployed:** All contracts are live on Calibration testnet.
 
-- **FiloraLicense1155** ✅ DEPLOYED - ERC-1155 NFT contract for asset licensing
-- **FilecoinPay** ✅ DEPLOYED - Payment processing with automatic royalty distribution
-- **LicenseVerifier** ✅ DEPLOYED - On-chain license verification and management
-- **USDFC Token** ✅ DEPLOYED - Stablecoin for payments
+- **FiloraLicense1155** ✅ `0x0a609046e6cd45C5408f3e283003B4bcB9050C6F` - ERC-1155 NFT contract
+- **FilecoinPay** ✅ `0xa4118fB7de0666ca38b4e2630204D0a49e486037` - Payment processing
+- **LicenseVerifier** ✅ `0x25f2133C8A11abB2B9CB72184f88CDF31b353E85` - License verification
+- **AssetRegistry** ✅ `0x935f69f2A66FaF91004434aFc89f7180161db32d` - Marketplace registry with price
+- **USDFC Token** ✅ - Stablecoin for payments
 
-See [SMART_CONTRACTS.md](./SMART_CONTRACTS.md) for deployment guide and instructions.
+See [SMART_CONTRACTS.md](./SMART_CONTRACTS.md) and [REGISTRY_DEPLOYMENT.md](./REGISTRY_DEPLOYMENT.md) for details.
 
 ### Key Hooks
 
 **Storage & Assets:**
 - `useBalances` - Query FIL, USDFC, and storage balances
 - `usePayment` - Pay for Filecoin storage (10GB/30 days)
-- `useFileUpload` - Upload files to Filecoin via Synapse SDK
-- `useDatasets` - Fetch user's datasets
-- `useAllDatasets` - Fetch all marketplace datasets
+- `useFileUpload` - Upload files to Filecoin with price metadata
+- `useDatasets` - Fetch user's datasets with pagination (10 per page)
+- `useAllDatasets` - Fetch all marketplace datasets from AssetRegistry
+- `useAssetRegistry` - Register and query assets from registry contract
 
 **NFT & Payments:**
 - `useNFTMint` - Mint ERC-1155 NFT licenses
@@ -176,13 +186,14 @@ See [SMART_CONTRACTS.md](./SMART_CONTRACTS.md) for deployment guide and instruct
 ### Components
 
 **Marketplace:**
-- `MarketplaceGrid` - Display all assets with grid/owner view
-- `UploadAsset` - Upload interface
-- `MyAssets` - User's asset collection
+- `MarketplaceGrid` - Display all assets with grid/owner view, pagination, filters
+- `UploadAsset` - Upload interface with price and royalty settings
+- `MyAssets` - User's asset collection with pagination (10 per page)
 - `NFTMintModal` - Mint NFT licenses
 - `PurchaseModal` - Buy assets with royalty breakdown
 - `LicenseVerificationBadge` - Show license status
 - `RoyaltyManager` - Withdraw creator earnings
+- `AssetPreview` - Display asset images via Filbeam CDN
 
 ## Tech Stack
 

@@ -7,7 +7,7 @@ import { AssetRegistryABI } from "@/contracts/abis";
 export const useAssetRegistry = () => {
   const { writeContractAsync } = useWriteContract();
 
-  const registerAsset = async (datasetId: number, providerId: number, pieceCid: string) => {
+  const registerAsset = async (datasetId: number, providerId: number, pieceCid: string, price: number = 0) => {
     if (!CONTRACT_ADDRESSES.AssetRegistry) {
       throw new Error("AssetRegistry contract not deployed");
     }
@@ -16,7 +16,7 @@ export const useAssetRegistry = () => {
       address: CONTRACT_ADDRESSES.AssetRegistry as `0x${string}`,
       abi: AssetRegistryABI,
       functionName: "registerAsset",
-      args: [BigInt(datasetId), BigInt(providerId), pieceCid],
+      args: [BigInt(datasetId), BigInt(providerId), pieceCid, BigInt(price)],
     });
 
     return hash;
@@ -40,6 +40,7 @@ export const useGetActiveAssets = () => {
     datasetId: Number(asset.datasetId),
     providerId: Number(asset.providerId),
     pieceCid: asset.pieceCid,
+    price: Number(asset.price),
     timestamp: Number(asset.timestamp),
     isActive: asset.isActive,
   })) : undefined;

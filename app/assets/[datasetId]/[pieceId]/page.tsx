@@ -33,6 +33,10 @@ export default function AssetDetailPage() {
   const assetData = allData?.datasets?.find(ds => ds.pdpVerifierDataSetId === datasetId);
   const pieceData = assetData?.data?.pieces?.find(p => p.pieceId === pieceId);
   
+  // Use price from registry if available, otherwise from contract
+  const registryPrice = assetData?.price ? (assetData.price / 1e18).toFixed(2) : null;
+  const displayPrice = registryPrice || price;
+  
   const asset = {
     id: `${datasetId}-${pieceId}`,
     name: `Digital Asset #${pieceId}`,
@@ -65,19 +69,19 @@ export default function AssetDetailPage() {
             animate={{ opacity: 1, x: 0 }}
             className="bg-white rounded-2xl shadow-xl overflow-hidden"
           >
-            <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 h-96 flex items-center justify-center relative">
-              {pieceData?.pieceCid ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <a 
-                    href={getFilbeamPieceUrl(pieceData.pieceCid.toString())} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-white hover:text-gray-200 transition-colors text-center"
-                  >
-                    <span className="text-9xl block mb-4">🎨</span>
-                    <span className="text-sm bg-black/50 px-4 py-2 rounded-lg">Click to preview via Filbeam CDN</span>
-                  </a>
-                </div>
+            <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 h-96 flex items-center justify-center relative overflow-hidden">
+              {pieceData?.pieceCid && asset.owner ? (
+                <>
+                  <img
+                    src={`https://${asset.owner}.calibration.filcdn.io/${pieceData.pieceCid.toString()}`}
+                    alt={asset.name}
+                    className="w-full h-full object-cover absolute inset-0"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <span className="text-9xl relative z-10">🎨</span>
+                </>
               ) : (
                 <span className="text-9xl">🎨</span>
               )}
@@ -98,10 +102,10 @@ export default function AssetDetailPage() {
                   <span className="text-gray-600">Created:</span>
                   <span className="font-semibold">{asset.created}</span>
                 </div>
-                {price && parseFloat(price) > 0 && (
+                {displayPrice && parseFloat(displayPrice) > 0 && (
                   <div className="flex justify-between">
                     <span className="text-gray-600">Price:</span>
-                    <span className="font-bold text-indigo-600">{parseFloat(price).toFixed(2)} USDFC</span>
+                    <span className="font-bold text-indigo-600">{parseFloat(displayPrice).toFixed(2)} USDFC</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -145,17 +149,17 @@ export default function AssetDetailPage() {
                 </div>
               )}
 
-              {price && parseFloat(price) > 0 && (
+              {displayPrice && parseFloat(displayPrice) > 0 && (
                 <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6">
                   <p className="text-sm text-gray-600 mb-2">Current Price</p>
                   <p className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-                    {parseFloat(price).toFixed(2)} USDFC
+                    {parseFloat(displayPrice).toFixed(2)} USDFC
                   </p>
                 </div>
               )}
 
               <div className="space-y-4">
-                {price && parseFloat(price) > 0 && (
+                {displayPrice && parseFloat(displayPrice) > 0 && (
                   <button
                     onClick={() => setShowPurchaseModal(true)}
                     disabled={!address}
@@ -165,7 +169,7 @@ export default function AssetDetailPage() {
                         : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
                     }`}
                   >
-                    {!address ? "Connect Wallet" : `💳 Buy for ${parseFloat(price).toFixed(2)} USDFC`}
+                    {!address ? "Connect Wallet" : `💳 Buy for ${parseFloat(displayPrice).toFixed(2)} USDFC`}
                   </button>
                 )}
                 <button
@@ -218,16 +222,16 @@ export default function AssetDetailPage() {
                   asset.status === "Live" ? "text-green-600" : "text-gray-600"
                 }`}>{asset.status}</span>
               </div>
-              {pieceData?.pieceCid && (
+              {pieceData?.pieceCid && asset.owner && (
                 <div className="pt-2">
                   <span className="text-gray-600 font-medium block mb-2">🌐 CDN Access:</span>
                   <a 
-                    href={getFilbeamPieceUrl(pieceData.pieceCid.toString())} 
+                    href={`https://${asset.owner}.calibration.filcdn.io/${pieceData.pieceCid.toString()}`}
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-indigo-600 hover:text-indigo-700 text-xs break-all underline"
                   >
-                    {getFilbeamPieceUrl(pieceData.pieceCid.toString())}
+                    https://{asset.owner}.calibration.filcdn.io/{pieceData.pieceCid.toString()}
                   </a>
                 </div>
               )}
@@ -277,14 +281,14 @@ export default function AssetDetailPage() {
         ownerAddress={contractCreator || asset.owner}
       />
       
-      {price && parseFloat(price) > 0 && (
+      {displayPrice && parseFloat(displayPrice) > 0 && (
         <PurchaseModal
           isOpen={showPurchaseModal}
           onClose={() => setShowPurchaseModal(false)}
           assetId={datasetId}
           assetName={asset.name}
           seller={asset.owner}
-          price={price}
+          price={displayPrice}
         />
       )}
     </div>

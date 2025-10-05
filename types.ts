@@ -7,6 +7,7 @@ import {
 export interface DataSet extends EnhancedDataSetInfo {
   data: DataSetData | null;
   provider: ProviderInfo | null;
+  price?: number;
 }
 
 export interface NFTLicense {

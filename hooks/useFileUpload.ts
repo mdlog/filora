@@ -27,7 +27,7 @@ export const useFileUpload = () => {
   const { registerAsset } = useAssetRegistry();
   const mutation = useMutation({
     mutationKey: ["file-upload", address],
-    mutationFn: async (file: File) => {
+    mutationFn: async ({ file, price }: { file: File; price?: string }) => {
       if (!synapse) throw new Error("Synapse not found");
       if (!address) throw new Error("Address not found");
       setProgress(0);
@@ -146,10 +146,12 @@ export const useFileUpload = () => {
         const datasets = await synapse.storage.findDataSets(address);
         if (datasets.length > 0) {
           const dataset = datasets[0];
+          const priceValue = price ? Number(price) : 0;
           await registerAsset(
             dataset.pdpVerifierDataSetId,
             dataset.providerId,
-            pieceCid.toV1().toString()
+            pieceCid.toV1().toString(),
+            priceValue
           );
           setStatus("✅ Asset registered in marketplace!");
         }

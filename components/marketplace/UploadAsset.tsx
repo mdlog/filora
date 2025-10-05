@@ -167,8 +167,9 @@ export const UploadAsset = () => {
             onClick={async () => {
               if (!file || !address) return;
               try {
-                // Upload file to Filecoin
-                const result = await uploadFile(file);
+                // Upload file to Filecoin with price
+                const priceInWei = metadata.price ? parseEther(metadata.price) : BigInt(0);
+                const result = await uploadFile({ file, price: priceInWei.toString() });
                 
                 // Get dataset ID from upload result
                 if (result?.datasetId) {
