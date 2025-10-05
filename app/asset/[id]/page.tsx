@@ -4,6 +4,12 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useAccount } from "wagmi";
 import { useBalances } from "@/hooks/useBalances";
+import { NFTMintModal } from "@/components/marketplace/NFTMintModal";
+import { PurchaseModal } from "@/components/marketplace/PurchaseModal";
+import { LicenseVerificationBadge } from "@/components/marketplace/LicenseVerificationBadge";
+import { useRoyaltyInfo } from "@/hooks/useRoyaltyInfo";
+import { useQuery } from "@tanstack/react-query";
+import { useAllDatasets } from "@/hooks/useAllDatasets";
 
 export default function AssetDetailPage() {
   const params = useParams();
@@ -11,26 +17,34 @@ export default function AssetDetailPage() {
   const { address } = useAccount();
   const { data: balances } = useBalances();
   const [quantity, setQuantity] = useState(1);
-  const [isPurchasing, setIsPurchasing] = useState(false);
-
+  const [showMintModal, setShowMintModal] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  
+  const assetId = params.id as string;
+  const [datasetId, pieceId] = assetId.split('-').map(Number);
+  const { data: allData } = useAllDatasets();
+  const { creator, percentage } = useRoyaltyInfo(datasetId);
+  
+  // Find the specific asset from marketplace data
+  const assetData = allData?.datasets?.find(ds => ds.pdpVerifierDataSetId === datasetId);
+  const pieceData = assetData?.data?.pieces?.find(p => p.pieceId === pieceId);
+  
   const asset = {
-    id: params.id,
-    name: `Digital Asset #${params.id}`,
-    description: "Exclusive digital artwork stored permanently on Filecoin blockchain. This unique piece represents the future of digital ownership.",
+    id: assetId,
+    name: `Digital Asset #${pieceId}`,
+    description: "Exclusive digital asset stored permanently on Filecoin blockchain via Synapse SDK. Verified on-chain with decentralized storage.",
     price: 25,
-    owner: "0x1234...5678",
-    pieceCid: "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
-    created: "2024-01-15",
-    category: "Digital Art",
-    status: "Live",
+    owner: assetData?.payer || assetData?.data?.payer || "Unknown",
+    pieceCid: pieceData?.pieceCid?.toString() || "Loading...",
+    created: new Date().toISOString().split('T')[0],
+    category: "Digital Asset",
+    status: assetData?.isLive ? "Live" : "Inactive",
+    provider: assetData?.provider?.name || "Unknown",
+    datasetId,
+    pieceId,
   };
 
-  const handlePurchase = async () => {
-    setIsPurchasing(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    alert(`Successfully purchased ${quantity} x ${asset.name} for ${asset.price * quantity} USDFC!`);
-    setIsPurchasing(false);
-  };
+
 
   const totalPrice = asset.price * quantity;
   const canAfford = balances && balances.usdfcBalanceFormatted >= totalPrice;
@@ -74,7 +88,11 @@ export default function AssetDetailPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Owner:</span>
-                  <span className="font-mono text-xs">{asset.owner}</span>
+                  <span className="font-mono text-xs">{asset.owner.length > 20 ? `${asset.owner.slice(0, 6)}...${asset.owner.slice(-4)}` : asset.owner}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Provider:</span>
+                  <span className="text-xs">{asset.provider}</span>
                 </div>
                 <div>
                   <span className="text-gray-600">Piece CID:</span>
@@ -92,8 +110,22 @@ export default function AssetDetailPage() {
             className="space-y-6"
           >
             <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">{asset.name}</h1>
+              <div className="flex items-center justify-between mb-4">
+                <h1 className="text-4xl font-bold text-gray-800">{asset.name}</h1>
+                <LicenseVerificationBadge tokenId={assetId} />
+              </div>
               <p className="text-gray-600 mb-6 leading-relaxed">{asset.description}</p>
+              
+              {creator && percentage && (
+                <div className="bg-purple-50 rounded-xl p-4 mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">🎨</span>
+                    <span className="font-semibold text-gray-800">Creator Royalties</span>
+                  </div>
+                  <p className="text-sm text-gray-600">Creator: {creator.slice(0, 6)}...{creator.slice(-4)}</p>
+                  <p className="text-sm text-gray-600">Royalty: {Number(percentage) / 100}%</p>
+                </div>
+              )}
 
               <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6">
                 <p className="text-sm text-gray-600 mb-2">Current Price</p>
@@ -155,17 +187,30 @@ export default function AssetDetailPage() {
                   )}
                 </div>
 
-                <button
-                  onClick={handlePurchase}
-                  disabled={isPurchasing || !canAfford || !address}
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                    isPurchasing || !canAfford || !address
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
-                  }`}
-                >
-                  {isPurchasing ? "Processing..." : !address ? "Connect Wallet" : !canAfford ? "Insufficient Balance" : `🛒 Buy Now for ${totalPrice} USDFC`}
-                </button>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setShowPurchaseModal(true)}
+                    disabled={!canAfford || !address}
+                    className={`py-4 rounded-xl font-bold text-lg transition-all ${
+                      !canAfford || !address
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
+                    }`}
+                  >
+                    {!address ? "Connect Wallet" : !canAfford ? "Insufficient Balance" : `💳 Buy ${totalPrice} USDFC`}
+                  </button>
+                  <button
+                    onClick={() => setShowMintModal(true)}
+                    disabled={!address}
+                    className={`py-4 rounded-xl font-bold text-lg transition-all ${
+                      !address
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
+                    }`}
+                  >
+                    🪙 Mint NFT
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -206,6 +251,22 @@ export default function AssetDetailPage() {
           </motion.div>
         </div>
       </div>
+      
+      <NFTMintModal
+        isOpen={showMintModal}
+        onClose={() => setShowMintModal(false)}
+        assetId={assetId}
+        assetName={asset.name}
+      />
+      
+      <PurchaseModal
+        isOpen={showPurchaseModal}
+        onClose={() => setShowPurchaseModal(false)}
+        assetId={assetId}
+        assetName={asset.name}
+        seller={asset.owner}
+        price={totalPrice.toString()}
+      />
     </div>
   );
 }

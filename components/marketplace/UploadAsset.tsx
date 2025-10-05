@@ -1,14 +1,30 @@
 "use client";
 import { useState, useCallback } from "react";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useNFTMint } from "@/hooks/useNFTMint";
 import { motion } from "framer-motion";
+import { useAccount } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { CONTRACT_ADDRESSES } from "@/contracts/addresses";
+import { FILECOIN_PAY_ABI } from "@/contracts/abis";
+import { parseEther } from "ethers";
 
 export const UploadAsset = () => {
+  const { address } = useAccount();
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [metadata, setMetadata] = useState({ name: "", description: "", price: "" });
+  const [metadata, setMetadata] = useState({ 
+    name: "", 
+    description: "", 
+    price: "",
+    royaltyPercentage: "10" // Default 10% royalty
+  });
+  const [datasetId, setDatasetId] = useState<number | null>(null);
   const { uploadFileMutation, uploadedInfo, handleReset, status, progress } = useFileUpload();
   const { isPending: isUploading, mutateAsync: uploadFile } = uploadFileMutation;
+  const { mutateAsync: mintNFT } = useNFTMint();
+  const { writeContract, data: hash } = useWriteContract();
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -121,31 +137,84 @@ export const UploadAsset = () => {
               value={metadata.price}
               onChange={(e) => setMetadata({ ...metadata, price: e.target.value })}
               placeholder="0.00"
+              step="0.01"
+              min="0"
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Royalty Percentage (%)
+            </label>
+            <input
+              type="number"
+              value={metadata.royaltyPercentage}
+              onChange={(e) => setMetadata({ ...metadata, royaltyPercentage: e.target.value })}
+              placeholder="10"
+              step="1"
+              min="0"
+              max="100"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Percentage of sales that goes to you as the creator (0-100%)
+            </p>
           </div>
         </div>
 
         <div className="flex gap-4">
           <button
             onClick={async () => {
-              if (!file) return;
-              await uploadFile(file);
+              if (!file || !address) return;
+              try {
+                // Upload file to Filecoin
+                const result = await uploadFile(file);
+                
+                // Get dataset ID from upload result
+                if (result?.datasetId) {
+                  setDatasetId(result.datasetId);
+                  
+                  // Set price on FilecoinPay contract
+                  if (metadata.price && parseFloat(metadata.price) > 0) {
+                    const priceInWei = parseEther(metadata.price);
+                    writeContract({
+                      address: CONTRACT_ADDRESSES.FilecoinPay as `0x${string}`,
+                      abi: FILECOIN_PAY_ABI,
+                      functionName: 'setPrice',
+                      args: [BigInt(result.datasetId), priceInWei],
+                    });
+                  }
+                  
+                  // Set royalty on FilecoinPay contract
+                  if (metadata.royaltyPercentage && parseFloat(metadata.royaltyPercentage) > 0) {
+                    const royaltyBps = Math.floor(parseFloat(metadata.royaltyPercentage) * 100);
+                    writeContract({
+                      address: CONTRACT_ADDRESSES.FilecoinPay as `0x${string}`,
+                      abi: FILECOIN_PAY_ABI,
+                      functionName: 'setRoyalty',
+                      args: [BigInt(result.datasetId), address, BigInt(royaltyBps)],
+                    });
+                  }
+                }
+              } catch (error) {
+                console.error("Upload failed:", error);
+              }
             }}
-            disabled={!file || isUploading || !!uploadedInfo}
+            disabled={!file || isUploading || !!uploadedInfo || !address}
             className={`flex-1 py-4 rounded-xl font-semibold text-lg transition-all ${
-              !file || isUploading || uploadedInfo
+              !file || isUploading || uploadedInfo || !address
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                 : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
             }`}
           >
-            {isUploading ? "Uploading..." : uploadedInfo ? "✅ Uploaded" : "🚀 Upload Asset"}
+            {!address ? "Connect Wallet" : isUploading ? "Uploading..." : uploadedInfo ? "✅ Uploaded" : "🚀 Upload Asset"}
           </button>
           <button
             onClick={() => {
               handleReset();
               setFile(null);
-              setMetadata({ name: "", description: "", price: "" });
+              setDatasetId(null);
+              setMetadata({ name: "", description: "", price: "", royaltyPercentage: "10" });
             }}
             disabled={!file || isUploading}
             className={`px-8 py-4 rounded-xl font-semibold transition-all ${
@@ -197,8 +266,16 @@ export const UploadAsset = () => {
             </h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">File name:</span>
-                <span className="font-semibold text-gray-800">{uploadedInfo.fileName}</span>
+                <span className="text-gray-600">Asset Name:</span>
+                <span className="font-semibold text-gray-800">{metadata.name || uploadedInfo.fileName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Price:</span>
+                <span className="font-semibold text-gray-800">{metadata.price || "0"} USDFC</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Royalty:</span>
+                <span className="font-semibold text-gray-800">{metadata.royaltyPercentage}%</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">File size:</span>
@@ -214,7 +291,23 @@ export const UploadAsset = () => {
                 <span className="text-gray-600">Tx Hash:</span>
                 <p className="font-mono text-xs mt-1 bg-white p-2 rounded">{uploadedInfo.txHash}</p>
               </div>
+              {datasetId !== null && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Dataset ID:</span>
+                  <span className="font-semibold text-gray-800">#{datasetId}</span>
+                </div>
+              )}
             </div>
+            {isConfirming && (
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">⏳ Setting royalty on-chain...</p>
+              </div>
+            )}
+            {hash && !isConfirming && (
+              <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                <p className="text-sm text-green-700">✅ Royalty set successfully!</p>
+              </div>
+            )}
           </motion.div>
         )}
       </motion.div>

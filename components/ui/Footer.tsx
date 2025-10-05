@@ -43,7 +43,7 @@ export default function Footer() {
           <div>
             <h4 className="font-bold mb-4">Community</h4>
             <ul className="space-y-2 text-sm opacity-90">
-              <li><a href="https://github.com/FIL-Builders/fs-upload-dapp" target="_blank" className="hover:underline">GitHub</a></li>
+              <li><a href="https://github.com/mdlog/filora" target="_blank" className="hover:underline">GitHub</a></li>
               <li><a href="https://filecoin.io" target="_blank" className="hover:underline">Filecoin</a></li>
               <li><a href="https://docs.filecoin.io" target="_blank" className="hover:underline">Documentation</a></li>
             </ul>
@@ -53,7 +53,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="border-t border-white/20 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm opacity-80">
-            © 2024 Filora. Built with ❤️ on Filecoin.
+            © 2025 Filora. Built with ❤️ on Filecoin.
           </p>
           <div className="flex items-center gap-4 text-sm opacity-80">
             <span>Powered by Synapse SDK</span>

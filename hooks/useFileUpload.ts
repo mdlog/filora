@@ -5,6 +5,7 @@ import { useAccount } from "wagmi";
 import { preflightCheck } from "@/utils/preflightCheck";
 import { useSynapse } from "@/providers/SynapseProvider";
 import { Synapse } from "@filoz/synapse-sdk";
+import { useAssetRegistry } from "@/hooks/useAssetRegistry";
 
 export type UploadedInfo = {
   fileName?: string;
@@ -23,6 +24,7 @@ export const useFileUpload = () => {
   const { synapse } = useSynapse();
   const { triggerConfetti } = useConfetti();
   const { address } = useAccount();
+  const { registerAsset } = useAssetRegistry();
   const mutation = useMutation({
     mutationKey: ["file-upload", address],
     mutationFn: async (file: File) => {
@@ -137,6 +139,24 @@ export const useFileUpload = () => {
         fileSize: file.size,
         pieceCid: pieceCid.toV1().toString(),
       }));
+
+      // Register asset in registry contract
+      try {
+        setStatus("📝 Registering asset in marketplace...");
+        const datasets = await synapse.storage.findDataSets(address);
+        if (datasets.length > 0) {
+          const dataset = datasets[0];
+          await registerAsset(
+            dataset.pdpVerifierDataSetId,
+            dataset.providerId,
+            pieceCid.toV1().toString()
+          );
+          setStatus("✅ Asset registered in marketplace!");
+        }
+      } catch (error) {
+        console.warn("Failed to register asset:", error);
+        // Don't fail the upload if registry fails
+      }
     },
     onSuccess: () => {
       setStatus("🎉 File successfully stored on Filecoin!");

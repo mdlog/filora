@@ -2,11 +2,13 @@
 import { useState, useCallback } from "react";
 import { useAccount } from "wagmi";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const FileUploader = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const { isConnected } = useAccount();
+  const queryClient = useQueryClient();
 
   const { uploadFileMutation, uploadedInfo, handleReset, status, progress } =
     useFileUpload();
@@ -106,6 +108,10 @@ export const FileUploader = () => {
           onClick={async () => {
             if (!file) return;
             await uploadFile(file);
+            // Refetch marketplace data after upload
+            setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ["all-datasets"] });
+            }, 2000);
           }}
           disabled={!file || isUploading || !!uploadedInfo}
           aria-disabled={!file || isUploading}

@@ -40,9 +40,9 @@ export default function RootLayout({
         />
         <meta
           name="keywords"
-          content="Filecoin, Demo, synapse-sdk, pdp, upload, filecoin, usdfc"
+          content="Filecoin, Marketplace, NFT, Digital Assets, Synapse SDK, USDFC"
         />
-        <meta name="author" content="FIL-Builders" />
+        <meta name="author" content="Filora Team" />
         <meta name="viewport" content="width=device-width, initial-scale=0.6" />
         <link rel="icon" href="/filora.png" />
       </head>

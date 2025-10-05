@@ -12,8 +12,9 @@ import { UploadAsset } from "@/components/marketplace/UploadAsset";
 import { MyAssets } from "@/components/marketplace/MyAssets";
 import { StorageManager } from "@/components/StorageManager";
 import { Hero } from "@/components/Hero";
+import { RoyaltyManager } from "@/components/marketplace/RoyaltyManager";
 
-type Tab = "marketplace" | "upload" | "my-assets" | "storage";
+type Tab = "marketplace" | "upload" | "my-assets" | "dashboard" | "royalties";
 
 export default function Home() {
   const { isConnected, chainId } = useAccount();
@@ -24,7 +25,7 @@ export default function Home() {
   const { data: balances, isLoading: isLoadingBalances } = useBalances();
 
   const isTab = (value: string | null): value is Tab =>
-    value === "marketplace" || value === "upload" || value === "my-assets" || value === "storage";
+    value === "marketplace" || value === "upload" || value === "my-assets" || value === "dashboard" || value === "royalties";
 
   const updateUrl = (tab: Tab) => {
     const params = new URLSearchParams(searchParams?.toString());
@@ -183,10 +184,16 @@ export default function Home() {
                 label="My Assets"
               />
               <TabButton
-                active={activeTab === "storage"}
-                onClick={() => handleTabChange("storage")}
-                icon="💾"
-                label="Storage"
+                active={activeTab === "royalties"}
+                onClick={() => handleTabChange("royalties")}
+                icon="💰"
+                label="Royalties"
+              />
+              <TabButton
+                active={activeTab === "dashboard"}
+                onClick={() => handleTabChange("dashboard")}
+                icon="📊"
+                label="Dashboard"
               />
             </motion.div>
 
@@ -225,15 +232,26 @@ export default function Home() {
                   <MyAssets />
                 </motion.div>
               )}
-              {activeTab === "storage" && (
+              {activeTab === "dashboard" && (
                 <motion.div
-                  key="storage"
+                  key="dashboard"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3 }}
                 >
                   <StorageManager />
+                </motion.div>
+              )}
+              {activeTab === "royalties" && (
+                <motion.div
+                  key="royalties"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <RoyaltyManager />
                 </motion.div>
               )}
             </AnimatePresence>

@@ -9,6 +9,29 @@ export interface DataSet extends EnhancedDataSetInfo {
   provider: ProviderInfo | null;
 }
 
+export interface NFTLicense {
+  tokenId: number;
+  owner: string;
+  amount: number;
+  uri: string;
+  mintedAt: number;
+}
+
+export interface RoyaltyInfo {
+  creator: string;
+  percentage: bigint;
+  totalEarned: bigint;
+}
+
+export interface PaymentTransaction {
+  from: string;
+  to: string;
+  amount: bigint;
+  tokenId: number;
+  timestamp: number;
+  txHash: string;
+}
+
 export interface DatasetsResponse {
   datasets: DataSet[];
 }
