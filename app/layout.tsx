@@ -33,10 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Filecoin onchain cloud demo</title>
+        <title>Filora - Decentralized Digital Asset Marketplace</title>
         <meta
           name="description"
-          content="Demo dApp Powered by synapse-sdk. Upload files to Filecoin with USDFC."
+          content="Filora - Buy, sell, and trade digital assets on Filecoin blockchain. Powered by Synapse SDK."
         />
         <meta
           name="keywords"
@@ -44,7 +44,7 @@ export default function RootLayout({
         />
         <meta name="author" content="FIL-Builders" />
         <meta name="viewport" content="width=device-width, initial-scale=0.6" />
-        <link rel="icon" href="/filecoin.svg" />
+        <link rel="icon" href="/filora.png" />
       </head>
       <body>
         <GeolocationProvider

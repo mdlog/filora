@@ -1,52 +1,30 @@
 "use client";
-import { StorageManager } from "@/components/StorageManager";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
-import { FileUploader } from "../components/FileUploader";
 import { motion, AnimatePresence } from "framer-motion";
 import Confetti from "@/components/ui/Confetti";
 import { useConfetti } from "@/hooks/useConfetti";
-import { DatasetsViewer } from "@/components/DatasetsViewer";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useBalances } from "@/hooks/useBalances";
-import Github from "@/components/ui/icons/Github";
-import Filecoin from "@/components/ui/icons/Filecoin";
 import { useRouter, useSearchParams } from "next/navigation";
+import { MarketplaceGrid } from "@/components/marketplace/MarketplaceGrid";
+import { UploadAsset } from "@/components/marketplace/UploadAsset";
+import { MyAssets } from "@/components/marketplace/MyAssets";
+import { StorageManager } from "@/components/StorageManager";
+import { Hero } from "@/components/Hero";
 
-type Tab = "manage-storage" | "upload" | "datasets";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "smooth",
-    },
-  },
-};
+type Tab = "marketplace" | "upload" | "my-assets" | "storage";
 
 export default function Home() {
   const { isConnected, chainId } = useAccount();
-  const [activeTab, setActiveTab] = useState<Tab>("manage-storage");
+  const [activeTab, setActiveTab] = useState<Tab>("marketplace");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showConfetti } = useConfetti();
   const { data: balances, isLoading: isLoadingBalances } = useBalances();
 
   const isTab = (value: string | null): value is Tab =>
-    value === "manage-storage" || value === "upload" || value === "datasets";
+    value === "marketplace" || value === "upload" || value === "my-assets" || value === "storage";
 
   const updateUrl = (tab: Tab) => {
     const params = new URLSearchParams(searchParams?.toString());
@@ -66,212 +44,228 @@ export default function Home() {
     } else if (!tabParam) {
       updateUrl(activeTab);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   return (
-    <div className="w-full flex flex-col justify-center min-h-fit">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {showConfetti && (
         <Confetti
           recycle={false}
           numberOfPieces={200}
           gravity={0.2}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            zIndex: 9999,
-            pointerEvents: "none",
-          }}
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 9999, pointerEvents: "none" }}
         />
       )}
-      <motion.main
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="flex flex-col items-center my-10  w-full mx-auto"
-      >
+
+      {/* Hero Section */}
+      <Hero />
+
+      {chainId !== 314159 && isConnected && (
         <motion.div
-          variants={itemVariants}
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.3 }}
-          className="text-3xl font-bold uppercase tracking-tighter text-foreground flex items-center gap-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-500 text-white py-3 text-center"
         >
-          <Filecoin />
-          Filecoin onchain cloud
-          <motion.a
-            whileHover={{ scale: 1.3 }}
-            href="https://github.com/FIL-Builders/fs-upload-dapp"
-            className="text-primary transition-colors duration-200 hover:underline cursor-pointer rounded-md hover:text-[#008cf6]"
-            target="_blank"
-          >
-            <Github />
-          </motion.a>
-          <motion.p
-            variants={itemVariants}
-            className="text-xl font-semibold lowercase transition-colors duration-50 hover:text-foreground flex items-center gap-2"
-          >
-            powered by
-            <motion.a
-              href="https://github.com/FilOzone/synapse-sdk"
-              className="text-primary transition-colors duration-200 hover:underline cursor-pointer hover:text-[#008cf6] rounded-md p-1"
-              target="_blank"
-            >
-              synapse-sdk
-            </motion.a>
-          </motion.p>
+          ⚠️ Please switch to Filecoin Calibration network
         </motion.div>
+      )}
 
-        <motion.p
-          variants={itemVariants}
-          className="text-lg font-semibold capitalize-none transition-colors duration-50 mb-2  mt-1 hover:text-foreground flex items-center gap-2 text-center"
-        >
-          upload files to filecoin with{" "}
-          <motion.a
-            href="https://docs.secured.finance/usdfc-stablecoin/getting-started"
-            className="text-[#e9ac00] hover:underline cursor-pointer"
-            target="_blank"
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        {!isConnected ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-5xl mx-auto py-16"
           >
-            USDFC
-          </motion.a>
-          your balance is
-          <span className="font-bold">
-            {isLoadingBalances || !isConnected
-              ? "..."
-              : balances?.usdfcBalanceFormatted.toFixed(1) + "$"}
-          </span>
-        </motion.p>
-        {chainId !== 314159 && (
-          <motion.p
-            variants={itemVariants}
-            className="text-lg font-semibold capitalize-none transition-colors duration-50 mb-2  mt-1 hover:text-foreground flex items-center gap-2 text-center"
-          >
-            <span className="max-w-xl text-center bg-red-600/70  p-2 rounded-md">
-              ⚠️ Filecoin mainnet is not supported yet. Please use Filecoin
-              Calibration network.
-            </span>
-          </motion.p>
+            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden">
+              <div className="grid md:grid-cols-2 gap-0">
+                {/* Left Side - Visual */}
+                <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-12 flex flex-col justify-center items-center text-white">
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    className="mb-8"
+                  >
+                    <div className="w-32 h-32 bg-white/20 backdrop-blur-lg rounded-full flex items-center justify-center">
+                      <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                  </motion.div>
+                  <h3 className="text-2xl font-bold mb-3">Secure Access</h3>
+                  <p className="text-center text-white/90 text-sm leading-relaxed">
+                    Your gateway to decentralized digital assets powered by Filecoin blockchain
+                  </p>
+                </div>
+
+                {/* Right Side - Content */}
+                <div className="p-12 flex flex-col justify-center">
+                  <motion.div
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                  >
+                    <h2 className="text-3xl font-bold text-gray-800 mb-3">Welcome to Filora</h2>
+                    <p className="text-gray-600 mb-8 leading-relaxed">
+                      Connect your Web3 wallet to start exploring, buying, and selling digital assets on our decentralized marketplace.
+                    </p>
+
+                    <div className="space-y-4 mb-8">
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <svg className="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">Browse Digital Assets</p>
+                          <p className="text-xs text-gray-500">Discover unique items from creators worldwide</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">Decentralized Storage</p>
+                          <p className="text-xs text-gray-500">Permanent storage on Filecoin network</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <svg className="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-800">Secure Transactions</p>
+                          <p className="text-xs text-gray-500">Trade with confidence using USDFC tokens</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center">
+                      <ConnectButton />
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <>
+            {/* Navigation Tabs */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl shadow-lg p-2 mb-8 flex gap-2 overflow-x-auto"
+            >
+              <TabButton
+                active={activeTab === "marketplace"}
+                onClick={() => handleTabChange("marketplace")}
+                icon="🏪"
+                label="Marketplace"
+              />
+              <TabButton
+                active={activeTab === "upload"}
+                onClick={() => handleTabChange("upload")}
+                icon="📤"
+                label="Upload Asset"
+              />
+              <TabButton
+                active={activeTab === "my-assets"}
+                onClick={() => handleTabChange("my-assets")}
+                icon="🖼️"
+                label="My Assets"
+              />
+              <TabButton
+                active={activeTab === "storage"}
+                onClick={() => handleTabChange("storage")}
+                icon="💾"
+                label="Storage"
+              />
+            </motion.div>
+
+            {/* Tab Content */}
+            <AnimatePresence mode="wait">
+              {activeTab === "marketplace" && (
+                <motion.div
+                  key="marketplace"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <MarketplaceGrid />
+                </motion.div>
+              )}
+              {activeTab === "upload" && (
+                <motion.div
+                  key="upload"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <UploadAsset />
+                </motion.div>
+              )}
+              {activeTab === "my-assets" && (
+                <motion.div
+                  key="my-assets"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <MyAssets />
+                </motion.div>
+              )}
+              {activeTab === "storage" && (
+                <motion.div
+                  key="storage"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <StorageManager />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
         )}
-        <AnimatePresence mode="wait">
-          {!isConnected ? (
-            <motion.div
-              key="connect"
-              variants={itemVariants}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 20,
-              }}
-              className="flex flex-col items-center"
-            >
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ConnectButton />
-              </motion.div>
-              <motion.p variants={itemVariants} className="mt-3 text-secondary">
-                Please connect your wallet to upload dApp
-              </motion.p>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="content"
-              variants={itemVariants}
-              className="mt-3 max-w-5xl w-full border-1 rounded-lg p-8"
-            >
-              <motion.div variants={itemVariants} className="flex mb-6">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleTabChange("manage-storage")}
-                  className={`flex-1 py-2 px-4 text-center border-b-2 transition-colors ${
-                    activeTab === "manage-storage"
-                      ? "border-primary text-primary-foreground bg-primary"
-                      : "border-transparent text-secondary hover:text-primary hover:bg-secondary/10"
-                  }`}
-                >
-                  Manage Storage
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleTabChange("upload")}
-                  className={`flex-1 py-2 px-4 text-center border-b-2 transition-colors ${
-                    activeTab === "upload"
-                      ? "border-primary text-primary-foreground bg-primary"
-                      : "border-transparent text-secondary hover:text-primary hover:bg-secondary/10"
-                  }`}
-                >
-                  Upload File
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleTabChange("datasets")}
-                  className={`flex-1 py-2 px-4 text-center border-b-2 transition-colors ${
-                    activeTab === "datasets"
-                      ? "border-primary text-primary-foreground bg-primary"
-                      : "border-transparent text-secondary hover:text-primary hover:bg-secondary/10"
-                  }`}
-                >
-                  View Datasets
-                </motion.button>
-              </motion.div>
-
-              <AnimatePresence mode="wait">
-                {activeTab === "manage-storage" ? (
-                  <motion.div
-                    key="deposit"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 200,
-                      damping: 20,
-                    }}
-                  >
-                    <StorageManager />
-                  </motion.div>
-                ) : activeTab === "upload" ? (
-                  <motion.div
-                    key="upload"
-                    // top to bottom
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: +20 }}
-                    transition={{
-                      type: "smooth",
-                    }}
-                  >
-                    <FileUploader />
-                  </motion.div>
-                ) : (
-                  activeTab === "datasets" && (
-                    <motion.div
-                      key="datasets"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 200,
-                        damping: 20,
-                      }}
-                    >
-                      <DatasetsViewer />
-                    </motion.div>
-                  )
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.main>
+      </div>
     </div>
   );
 }
+
+const TabButton = ({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: string;
+  label: string;
+}) => (
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={onClick}
+    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+      active
+        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+    }`}
+  >
+    <span className="text-xl">{icon}</span>
+    <span>{label}</span>
+  </motion.button>
+);

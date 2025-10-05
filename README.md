@@ -1,15 +1,16 @@
-# Filecoin Onchain Cloud dApp
+# Filora - Decentralized Digital Asset Marketplace
 
-
-This repo will serve with tutorial to demonstrate how to build a decentralized application (dApp) that interacts with Filecoin Synapse - a smart-contract based marketplace for storage and other services in the Filecoin ecosystem.
+Filora is a decentralized marketplace for buying, selling, and trading digital assets on the Filecoin blockchain. Built with Synapse SDK, Filora provides secure, permanent storage for your digital assets.
 
 ## Overview
 
-This dApp showcases:
-- Connecting to Filecoin networks (Mainnet/Calibration)
-- Installing synapse-sdk to your project.
-- Depositing funds to Synapse contracts using USDFC token.
-- Uploading files to Filecoin through Synapse
+Filora features:
+- 🎨 Browse and discover digital assets
+- 📤 Upload digital assets with metadata
+- 🖼️ Manage your asset collection
+- 💾 Decentralized storage on Filecoin
+- 💰 USDFC token payments
+- 🔐 Secure wallet connection
 
 ## Prerequisites
 
@@ -23,8 +24,8 @@ This dApp showcases:
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/fs-upload-app
-cd fs-upload-app
+git clone https://github.com/yourusername/filora
+cd filora
 ```
 
 2. Install dependencies:

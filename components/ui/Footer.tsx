@@ -1,100 +1,67 @@
 import { motion } from "framer-motion";
-import Link from "next/link";
-import Github from "./icons/Github";
-import Filecoin from "./icons/Filecoin";
+import Image from "next/image";
 
 export default function Footer() {
-  const footerVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut",
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const heartAnimation = {
-    scale: [1, 1.2, 1],
-    transition: {
-      duration: 1.5,
-      repeat: Infinity,
-      ease: "easeInOut",
-    },
-  };
-
   return (
-    <motion.footer
-      variants={footerVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
-      className="flex w-full items-center overflow-hidden justify-center overflow-y-auto rounded-t-lg bg-primary border-t"
-    >
-      <motion.div
-        variants={itemVariants}
-        className="mx-auto px-4 py-5 md:px-24 lg:px-8"
-      >
-        <motion.div
-          variants={footerVariants}
-          className="flex flex-col items-center gap-5"
-        >
-          <motion.div
-            variants={itemVariants}
-            className="flex items-center gap-3"
-          >
-            <motion.h1
-              variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.3 }}
-              className="text-3xl font-bold uppercase tracking-tighter text-foreground flex items-center gap-2"
-            >
-              <Filecoin />
-              Filecoin onchain cloud demo
-            </motion.h1>
-          </motion.div>
-          <motion.div
-            variants={itemVariants}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Link
-              className="text-center text-xl font-semibold transition-colors duration-200 hover:text-foreground flex items-center gap-2"
-              href="https://github.com/FIL-Builders/fs-upload-dapp"
-              target="_blank"
-            >
-              {"Fork me"}
-              <Github />
-            </Link>
-          </motion.div>
-          <motion.p variants={itemVariants} className="text-center text-lg">
-            Build with{" "}
-            <motion.span
-              animate={heartAnimation}
-              className="inline-block text-red-500"
-            >
-              ❤️
-            </motion.span>{" "}
-            for everyone
-          </motion.p>
-        </motion.div>
-      </motion.div>
-    </motion.footer>
+    <footer className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white mt-20">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid md:grid-cols-4 gap-8">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Image src="/filora.png" alt="Filora" width={40} height={40} className="rounded-full" />
+              <h3 className="text-2xl font-bold">Filora</h3>
+            </div>
+            <p className="text-sm opacity-90">
+              Decentralized Digital Asset Marketplace on Filecoin blockchain.
+            </p>
+          </div>
+
+          {/* Marketplace */}
+          <div>
+            <h4 className="font-bold mb-4">Marketplace</h4>
+            <ul className="space-y-2 text-sm opacity-90">
+              <li><a href="/?tab=marketplace" className="hover:underline">Browse Assets</a></li>
+              <li><a href="/?tab=upload" className="hover:underline">Upload Asset</a></li>
+              <li><a href="/?tab=my-assets" className="hover:underline">My Assets</a></li>
+              <li><a href="/?tab=storage" className="hover:underline">Storage</a></li>
+            </ul>
+          </div>
+
+          {/* Resources */}
+          <div>
+            <h4 className="font-bold mb-4">Resources</h4>
+            <ul className="space-y-2 text-sm opacity-90">
+              <li><a href="https://github.com/FilOzone/synapse-sdk" target="_blank" className="hover:underline">Synapse SDK</a></li>
+              <li><a href="https://docs.secured.finance/usdfc-stablecoin/getting-started" target="_blank" className="hover:underline">USDFC Token</a></li>
+              <li><a href="https://faucet.calibnet.chainsafe-fil.io/funds.html" target="_blank" className="hover:underline">Get tFIL</a></li>
+              <li><a href="https://forest-explorer.chainsafe.dev/faucet/calibnet_usdfc" target="_blank" className="hover:underline">Get USDFC</a></li>
+            </ul>
+          </div>
+
+          {/* Community */}
+          <div>
+            <h4 className="font-bold mb-4">Community</h4>
+            <ul className="space-y-2 text-sm opacity-90">
+              <li><a href="https://github.com/FIL-Builders/fs-upload-dapp" target="_blank" className="hover:underline">GitHub</a></li>
+              <li><a href="https://filecoin.io" target="_blank" className="hover:underline">Filecoin</a></li>
+              <li><a href="https://docs.filecoin.io" target="_blank" className="hover:underline">Documentation</a></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom */}
+        <div className="border-t border-white/20 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm opacity-80">
+            © 2024 Filora. Built with ❤️ on Filecoin.
+          </p>
+          <div className="flex items-center gap-4 text-sm opacity-80">
+            <span>Powered by Synapse SDK</span>
+            <span>•</span>
+            <span>Filecoin Calibration Network</span>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }
