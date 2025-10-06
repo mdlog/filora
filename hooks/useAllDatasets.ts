@@ -17,26 +17,26 @@ export const useAllDatasets = () => {
     queryFn: async () => {
       if (!synapse) throw new Error("Synapse not found");
       if (!warmStorageService) throw new Error("Warm storage service not found");
-      
+
       console.log("Registry assets:", registryAssets);
-      
+
       // Use registry if available
       if (CONTRACT_ADDRESSES.AssetRegistry && registryAssets && registryAssets.length > 0) {
         console.log("Loading assets from registry:", registryAssets.length);
         const allClientDatasets: DataSet[] = [];
-        
+
         for (const asset of registryAssets) {
           try {
             console.log(`Processing asset: datasetId=${asset.datasetId}, providerId=${asset.providerId}, pieceCid=${asset.pieceCid}`);
             const provider = await synapse.getProviderInfo(asset.providerId);
             console.log(`Provider info:`, provider.name, provider.id);
-            
+
             const serviceURL = provider.products.PDP?.data.serviceURL || "";
             if (!serviceURL) {
               console.warn(`No service URL for provider ${provider.id}`);
               continue;
             }
-            
+
             // Create mock data with pieceCid from registry
             const mockData = {
               id: asset.datasetId,
@@ -47,29 +47,29 @@ export const useAllDatasets = () => {
               nextChallengeEpoch: 0,
               payer: asset.owner,
             };
-            
+
             console.log(`Adding asset from registry with pieceCid: ${asset.pieceCid}, price: ${asset.price}`);
             allClientDatasets.push({
               pdpVerifierDataSetId: asset.datasetId,
               providerId: asset.providerId,
               payer: asset.owner,
-              payee: provider.address,
+              payee: (provider as any).address,
               provider,
               serviceURL,
               data: mockData as any,
               isLive: asset.isActive,
               price: asset.price,
-            } as DataSet);
+            } as unknown as DataSet);
           } catch (error) {
             console.error(`Failed to load asset from registry:`, error);
             console.error(`Asset details:`, asset);
           }
         }
-        
+
         console.log("Total datasets from registry:", allClientDatasets.length);
         return { datasets: allClientDatasets };
       }
-      
+
       console.log("No registry assets, falling back to provider scan");
 
       // Get all datasets from all providers
@@ -92,43 +92,43 @@ export const useAllDatasets = () => {
       // Fetch all datasets from all providers
       const allClientDatasets: DataSet[] = [];
       const seenDatasets = new Set<string>();
-      
+
       for (const provider of filteredProviders) {
         const serviceURL = provider.products.PDP?.data.serviceURL || "";
         if (!serviceURL) continue;
-        
+
         console.log(`Fetching datasets from provider: ${provider.name} (${provider.id})`);
-        
+
         const pdpServer = new PDPServer(null, serviceURL);
         let consecutiveFailures = 0;
         const maxConsecutiveFailures = 5;
         let providerDatasetCount = 0;
-        
+
         for (let datasetId = 0; datasetId < 100; datasetId++) {
           try {
             const data = await pdpServer.getDataSet(datasetId);
             if (data && data.pieces && data.pieces.length > 0) {
               consecutiveFailures = 0;
-              
+
               const datasetKey = `${provider.id}-${datasetId}`;
               if (seenDatasets.has(datasetKey)) continue;
               seenDatasets.add(datasetKey);
-              
+
               providerDatasetCount++;
-              const payer = data.payer || provider.address;
-              
+              const payer = (data as any).payer || (provider as any).address;
+
               console.log(`Provider ${provider.name} - Dataset ${datasetId}: payer=${payer}, pieces=${data.pieces.length}`);
-              
+
               allClientDatasets.push({
                 pdpVerifierDataSetId: datasetId,
                 providerId: provider.id,
                 payer,
-                payee: provider.address,
+                payee: (provider as any).address,
                 provider,
                 serviceURL,
                 data,
                 isLive: true,
-              } as DataSet);
+              } as unknown as DataSet);
             }
           } catch (error) {
             consecutiveFailures++;
@@ -145,7 +145,7 @@ export const useAllDatasets = () => {
         acc[d.provider?.name || 'Unknown'] = (acc[d.provider?.name || 'Unknown'] || 0) + 1;
         return acc;
       }, {} as Record<string, number>));
-      
+
       return { datasets: allClientDatasets };
     },
     staleTime: 30000,

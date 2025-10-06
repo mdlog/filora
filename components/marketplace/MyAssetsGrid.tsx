@@ -22,8 +22,8 @@ export const MyAssetsGrid = () => {
 
         // Get owner address from available sources
         const owner = dataset.payer ||
-            dataset.data?.payer ||
-            dataset.provider?.address ||
+            (dataset.data as any)?.payer ||
+            (dataset.provider as any)?.address ||
             dataset.payee;
 
         // Only include assets owned by current user
@@ -128,7 +128,7 @@ export const MyAssetsGrid = () => {
             >
                 <div className="text-6xl mb-4">🖼️</div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">No Assets Yet</h3>
-                <p className="text-gray-600 mb-4">You haven't uploaded any assets to the marketplace yet</p>
+                <p className="text-gray-600 mb-4">You haven&apos;t uploaded any assets to the marketplace yet</p>
                 <button
                     onClick={() => router.push("/?tab=upload")}
                     className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
@@ -279,8 +279,8 @@ export const MyAssetsGrid = () => {
                                     )}
                                     <div className="absolute top-3 right-3">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${asset.isLive
-                                                ? "bg-green-500 text-white"
-                                                : "bg-gray-500 text-white"
+                                            ? "bg-green-500 text-white"
+                                            : "bg-gray-500 text-white"
                                             }`}>
                                             {asset.isLive ? "✅ Live" : "⏸️ Inactive"}
                                         </span>
@@ -371,8 +371,8 @@ export const MyAssetsGrid = () => {
                                                 key={pageNum}
                                                 onClick={() => setCurrentPage(pageNum)}
                                                 className={`w-10 h-10 rounded-xl font-semibold transition-all ${currentPage === pageNum
-                                                        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
-                                                        : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
+                                                    : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                                                     }`}
                                             >
                                                 {pageNum}

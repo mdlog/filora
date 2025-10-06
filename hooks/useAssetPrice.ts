@@ -8,7 +8,7 @@ import { formatEther } from "ethers";
 export const useAssetPrice = (tokenId: number) => {
   const { data: price, isLoading } = useReadContract({
     address: CONTRACT_ADDRESSES.FilecoinPay as `0x${string}`,
-    abi: FilecoinPayABI,
+    abi: FilecoinPayABI as any,
     functionName: "assetPrice",
     args: [BigInt(tokenId)],
     query: {
@@ -16,11 +16,12 @@ export const useAssetPrice = (tokenId: number) => {
     },
   });
 
-  console.log(`Price for tokenId ${tokenId}:`, price, "formatted:", price ? formatEther(price as bigint) : "0");
+  const priceBigInt = price as bigint | undefined;
+  console.log(`Price for tokenId ${tokenId}:`, priceBigInt, "formatted:", priceBigInt ? formatEther(priceBigInt) : "0");
 
   return {
-    price: price && price > 0n ? formatEther(price as bigint) : "0",
-    priceRaw: price as bigint,
+    price: priceBigInt && priceBigInt > 0n ? formatEther(priceBigInt) : "0",
+    priceRaw: priceBigInt || 0n,
     isLoading,
   };
 };

@@ -7,7 +7,7 @@ import { CONTRACT_ADDRESSES } from "@/contracts/addresses";
 export const useAssetCreator = (tokenId: number) => {
   const { data: creator, isLoading } = useReadContract({
     address: CONTRACT_ADDRESSES.FiloraLicense1155 as `0x${string}`,
-    abi: FiloraLicense1155ABI,
+    abi: FiloraLicense1155ABI as any,
     functionName: "creators",
     args: [BigInt(tokenId)],
     query: {

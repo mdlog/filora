@@ -34,8 +34,46 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
   const sellerAmount = parseFloat(price) - royaltyAmount;
 
   const handlePurchase = async () => {
+    console.log("🛒 Purchase Debug Info:", {
+      buyer: address,
+      seller: seller,
+      sellerValid: seller && seller !== "Unknown" && seller !== "null" && seller.startsWith("0x"),
+      assetId,
+      pieceId,
+      price,
+      priceValid: price && parseFloat(price) > 0,
+      usdfcBalance: balances?.usdfcBalanceFormatted,
+      filBalance: balances?.filBalanceFormatted
+    });
+
     if (!address) {
       setError("Please connect your wallet");
+      return;
+    }
+
+    // ✅ VALIDATION: Check seller address is valid
+    if (!seller || seller === "Unknown" || seller === "null" || !seller.startsWith("0x")) {
+      setError(`❌ Invalid seller address: "${seller}". This asset doesn't have a valid owner recorded. Cannot process purchase. The asset may have been uploaded without proper ownership tracking.`);
+      console.error("❌ Seller validation failed:", {
+        seller,
+        isUnknown: seller === "Unknown",
+        isNull: seller === "null",
+        startsWithAddress: seller?.startsWith("0x"),
+        message: "Asset owner not properly set - upload may have failed or asset is invalid"
+      });
+      return;
+    }
+
+    // ✅ VALIDATION: Check price is valid
+    if (!price || parseFloat(price) <= 0) {
+      setError(`❌ Invalid price: "${price}". Cannot process purchase.`);
+      console.error("❌ Price validation failed:", price);
+      return;
+    }
+
+    // ✅ VALIDATION: Don't buy from yourself
+    if (seller.toLowerCase() === address.toLowerCase()) {
+      setError("❌ You cannot purchase your own asset!");
       return;
     }
 
@@ -46,12 +84,20 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
       const priceWei = parseEther(price);
       const usdfcBalance = balances?.usdfcBalance || BigInt(0);
 
-      console.log("Balance check:", {
+      console.log("💰 Balance check:", {
         required: priceWei.toString(),
+        requiredFormatted: price + " USDFC",
         available: usdfcBalance.toString(),
+        availableFormatted: formatEther(usdfcBalance) + " USDFC",
         hasEnough: usdfcBalance >= priceWei,
-        priceUSDFC: price,
-        balanceUSDFC: formatEther(usdfcBalance)
+      });
+
+      console.log("📋 Transaction parameters:", {
+        function: "processPayment",
+        to: seller,
+        amount: price,
+        amountWei: priceWei.toString(),
+        tokenId: assetId
       });
 
       if (usdfcBalance < priceWei) {
@@ -59,12 +105,17 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
         return;
       }
 
-      // Process payment
+      // Process payment with status updates
+      console.log("🛒 Starting purchase process...");
+      setError(""); // Clear any previous errors
+
       const result = await processPayment.mutateAsync({
         to: seller,
         amount: price,
         tokenId: assetId,
       });
+
+      console.log("✅ Payment completed successfully!");
 
       // Record purchase to localStorage
       await addPurchase({
@@ -73,16 +124,21 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
         pieceCid: pieceCid,
         price: price,
         seller: seller,
-        buyer: address,
         purchasedAt: Math.floor(Date.now() / 1000),
         txHash: result.paymentHash,
       });
 
+      console.log("✅ Purchase recorded!");
       triggerConfetti();
       onClose();
     } catch (error: any) {
-      console.error("Purchase failed:", error);
-      setError(error.message || "Purchase failed. Please try again.");
+      console.error("❌ Purchase failed:", error);
+      console.error("Error details:", {
+        message: error.message,
+        code: error.code,
+        data: error.data
+      });
+      setError(error.message || "❌ Purchase failed. Please try again.");
     }
   };
 
@@ -156,11 +212,29 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
             )}
 
             {processPayment.isPending && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                <p className="text-sm text-yellow-800 flex items-center gap-2">
-                  <span className="animate-spin">⏳</span>
-                  <span>Processing payment... Please confirm transactions in your wallet.</span>
+              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-xl p-4">
+                <p className="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
+                  <span className="animate-spin text-lg">⏳</span>
+                  <span>Transaction in Progress - Follow These Steps:</span>
                 </p>
+                <div className="space-y-2 text-xs text-amber-700">
+                  <div className="flex items-start gap-2">
+                    <span className="font-bold">1️⃣</span>
+                    <span>Confirm <strong>first MetaMask popup</strong> (Approve USDFC spending)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-bold">⏰</span>
+                    <span>Wait ~5-10 seconds for blockchain confirmation</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-bold">2️⃣</span>
+                    <span>Confirm <strong>second MetaMask popup</strong> (Process payment)</span>
+                  </div>
+                  <div className="flex items-start gap-2 mt-2 pt-2 border-t border-amber-200">
+                    <span className="font-bold">⚠️</span>
+                    <span><strong>IMPORTANT:</strong> Do NOT close this window or browser!</span>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -169,7 +243,7 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
               disabled={processPayment.isPending}
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {processPayment.isPending ? "⏳ Processing..." : "✅ Complete Purchase"}
+              {processPayment.isPending ? "⏳ Processing... (Check MetaMask)" : "✅ Complete Purchase"}
             </button>
           </div>
         </motion.div>

@@ -5,6 +5,7 @@ import { useBalances } from "@/hooks/useBalances";
 import { usePurchasedAssets } from "@/hooks/usePurchasedAssets";
 import { useAllDatasets } from "@/hooks/useAllDatasets";
 import { usePayment } from "@/hooks/usePayment";
+import { DepositModal } from "@/components/DepositModal";
 import { DataSet } from "@/types";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -25,6 +26,7 @@ export const Dashboard = () => {
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [tempUsername, setTempUsername] = useState("");
     const [isDismissedStorageAlert, setIsDismissedStorageAlert] = useState(false);
+    const [showDepositModal, setShowDepositModal] = useState(false);
 
     // Check if user has never used warm storage
     const hasNoWarmStorage = !isLoadingBalances &&
@@ -152,8 +154,8 @@ export const Dashboard = () => {
         if (!dataset?.data?.pieces) return [];
 
         const owner = dataset.payer ||
-            dataset.data?.payer ||
-            dataset.provider?.address ||
+            (dataset.data as any)?.payer ||
+            (dataset.provider as any)?.address ||
             dataset.payee;
 
         if (!address || !owner || owner.toLowerCase() !== address.toLowerCase()) {
@@ -365,14 +367,14 @@ export const Dashboard = () => {
                                 ⚠️ Warm Storage Setup Required
                             </h3>
                             <p className="text-orange-100 mb-4 text-sm leading-relaxed">
-                                You haven't set up warm storage yet. To upload files to Filecoin, you need to deposit USDFC tokens to pay for storage.
+                                You haven&apos;t set up warm storage yet. To upload files to Filecoin, you need to deposit USDFC tokens to pay for storage.
                             </p>
 
                             {canAutoSetup && (
                                 <div className="bg-green-500/20 border border-green-300 rounded-xl p-3 mb-4">
                                     <p className="text-green-100 text-sm font-semibold flex items-center gap-2">
                                         <span>✅</span>
-                                        Good news! You have enough balance. Click "Auto-Setup Storage Now" to automatically configure warm storage.
+                                        Good news! You have enough balance. Click &quot;Auto-Setup Storage Now&quot; to automatically configure warm storage.
                                     </p>
                                 </div>
                             )}
@@ -394,7 +396,7 @@ export const Dashboard = () => {
                                     <ol className="space-y-2 text-sm text-orange-50">
                                         <li className="flex items-start gap-2">
                                             <span className="font-bold text-white">1.</span>
-                                            <span>Click <strong>"Auto-Setup Storage Now"</strong> button below</span>
+                                            <span>Click <strong>&quot;Auto-Setup Storage Now&quot;</strong> button below</span>
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <span className="font-bold text-white">2.</span>
@@ -406,7 +408,7 @@ export const Dashboard = () => {
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <span className="font-bold text-white">4.</span>
-                                            <span>You're ready to upload files! 🎉</span>
+                                            <span>You&apos;re ready to upload files! 🎉</span>
                                         </li>
                                     </ol>
                                 ) : (
@@ -421,7 +423,7 @@ export const Dashboard = () => {
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <span className="font-bold text-white">3.</span>
-                                            <span>Click <strong>"Auto-Setup Storage Now"</strong> (will appear when you have balance)</span>
+                                            <span>Click <strong>&quot;Auto-Setup Storage Now&quot;</strong> (will appear when you have balance)</span>
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <span className="font-bold text-white">4.</span>
@@ -444,27 +446,49 @@ export const Dashboard = () => {
 
                             <div className="flex flex-wrap gap-3">
                                 {canAutoSetup ? (
-                                    // If user has balance, show auto-setup button
-                                    <button
-                                        onClick={handleSetupStorage}
-                                        disabled={isProcessingPayment}
-                                        className={`px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl flex items-center gap-2 ${isProcessingPayment
+                                    <>
+                                        {/* Auto-setup with default amount */}
+                                        <button
+                                            onClick={handleSetupStorage}
+                                            disabled={isProcessingPayment}
+                                            className={`px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl flex items-center gap-2 ${isProcessingPayment
                                                 ? "bg-gray-400 text-white cursor-not-allowed"
                                                 : "bg-white text-orange-600 hover:bg-orange-50 hover:scale-105"
-                                            }`}
-                                    >
-                                        <span>{isProcessingPayment ? "⏳" : "🚀"}</span>
-                                        {isProcessingPayment ? "Setting Up..." : "Auto-Setup Storage Now"}
-                                    </button>
+                                                }`}
+                                        >
+                                            <span>{isProcessingPayment ? "⏳" : "🚀"}</span>
+                                            {isProcessingPayment ? "Setting Up..." : "Quick Setup (Default)"}
+                                        </button>
+
+                                        {/* Custom amount setup */}
+                                        <button
+                                            onClick={() => setShowDepositModal(true)}
+                                            disabled={isProcessingPayment}
+                                            className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all border-2 border-white/30 hover:border-white/50 flex items-center gap-2"
+                                        >
+                                            <span>💰</span>
+                                            Custom Amount
+                                        </button>
+                                    </>
                                 ) : (
-                                    // If user doesn't have balance, show manual setup button
-                                    <button
-                                        onClick={() => router.push("/?tab=storage")}
-                                        className="px-6 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-orange-50 transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2"
-                                    >
-                                        <span>💾</span>
-                                        Manual Setup Storage
-                                    </button>
+                                    <>
+                                        {/* If user doesn't have balance, show custom setup button */}
+                                        <button
+                                            onClick={() => setShowDepositModal(true)}
+                                            className="px-6 py-3 bg-white text-orange-600 rounded-xl font-bold hover:bg-orange-50 transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2"
+                                        >
+                                            <span>💾</span>
+                                            Setup Storage
+                                        </button>
+
+                                        <button
+                                            onClick={() => router.push("/?tab=storage")}
+                                            className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all border-2 border-white/30 flex items-center gap-2"
+                                        >
+                                            <span>⚙️</span>
+                                            Advanced Setup
+                                        </button>
+                                    </>
                                 )}
 
                                 {!hasEnoughBalance && (
@@ -491,10 +515,10 @@ export const Dashboard = () => {
                             {/* Payment Status Indicator */}
                             {paymentStatus && (
                                 <div className={`mt-4 p-3 rounded-xl text-sm font-medium ${paymentStatus.includes("❌")
-                                        ? "bg-red-500/20 border border-red-300 text-red-100"
-                                        : paymentStatus.includes("✅")
-                                            ? "bg-green-500/20 border border-green-300 text-green-100"
-                                            : "bg-blue-500/20 border border-blue-300 text-blue-100"
+                                    ? "bg-red-500/20 border border-red-300 text-red-100"
+                                    : paymentStatus.includes("✅")
+                                        ? "bg-green-500/20 border border-green-300 text-green-100"
+                                        : "bg-blue-500/20 border border-blue-300 text-blue-100"
                                     }`}>
                                     {paymentStatus}
                                 </div>
@@ -742,18 +766,27 @@ export const Dashboard = () => {
                                 <p className={`text-3xl font-bold ${hasNoWarmStorage ? "text-red-600" : "text-gray-800"}`}>
                                     {isLoadingBalances ? "..." : balances?.warmStorageBalanceFormatted.toFixed(2) || "0.00"} <span className="text-lg text-gray-600">USDFC</span>
                                 </p>
-                                {hasNoWarmStorage && (
-                                    <button
-                                        onClick={canAutoSetup ? handleSetupStorage : () => router.push("/?tab=storage")}
-                                        disabled={isProcessingPayment}
-                                        className={`mt-2 text-xs px-3 py-1 rounded-full font-semibold transition-colors ${isProcessingPayment
+                                <div className="flex gap-2 mt-2">
+                                    {hasNoWarmStorage ? (
+                                        <button
+                                            onClick={canAutoSetup ? handleSetupStorage : () => router.push("/?tab=storage")}
+                                            disabled={isProcessingPayment}
+                                            className={`text-xs px-3 py-1 rounded-full font-semibold transition-colors ${isProcessingPayment
                                                 ? "bg-gray-400 text-white cursor-not-allowed"
                                                 : "bg-red-500 text-white hover:bg-red-600"
-                                            }`}
-                                    >
-                                        {isProcessingPayment ? "⏳ Setting Up..." : canAutoSetup ? "🚀 Auto-Setup →" : "Setup Now →"}
-                                    </button>
-                                )}
+                                                }`}
+                                        >
+                                            {isProcessingPayment ? "⏳ Setting Up..." : canAutoSetup ? "🚀 Auto-Setup →" : "Setup Now →"}
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => setShowDepositModal(true)}
+                                            className="text-xs px-3 py-1 rounded-full font-semibold bg-purple-500 text-white hover:bg-purple-600 transition-colors"
+                                        >
+                                            💰 Add More
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <div className={`text-5xl ${hasNoWarmStorage ? "animate-bounce" : ""}`}>
                                 {hasNoWarmStorage ? "⚠️" : "💾"}
@@ -824,6 +857,15 @@ export const Dashboard = () => {
                     </button>
                 </div>
             </motion.div>
+
+            {/* Deposit Modal */}
+            <DepositModal
+                isOpen={showDepositModal}
+                onClose={() => {
+                    setShowDepositModal(false);
+                    refetchBalances();
+                }}
+            />
         </div>
     );
 };

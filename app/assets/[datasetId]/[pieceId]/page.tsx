@@ -82,6 +82,10 @@ export default function AssetDetailPage() {
     pieceId,
   };
 
+  // Check if owner is valid
+  const hasValidOwner = asset.owner && asset.owner !== "Unknown" && asset.owner !== "null" && asset.owner.startsWith("0x");
+  const canPurchase = hasValidOwner && displayPrice && parseFloat(displayPrice) > 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12">
       <div className="container mx-auto px-4">
@@ -189,24 +193,44 @@ export default function AssetDetailPage() {
               )}
 
               <div className="space-y-4">
+                {/* Warning if owner is invalid */}
+                {!hasValidOwner && displayPrice && parseFloat(displayPrice) > 0 && (
+                  <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
+                    <p className="text-sm font-bold text-red-800 mb-2 flex items-center gap-2">
+                      <span>⚠️</span>
+                      <span>Cannot Purchase - Invalid Owner</span>
+                    </p>
+                    <p className="text-xs text-red-700">
+                      This asset doesn&apos;t have a valid owner address recorded. The asset may have been uploaded incorrectly or the ownership data was not properly set. Purchase is disabled.
+                    </p>
+                    <p className="text-xs text-red-600 mt-2 font-mono">
+                      Owner: {asset.owner}
+                    </p>
+                  </div>
+                )}
+
                 {displayPrice && parseFloat(displayPrice) > 0 && (
                   <button
                     onClick={() => setShowPurchaseModal(true)}
-                    disabled={!address}
-                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!address
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
+                    disabled={!address || !canPurchase}
+                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!address || !canPurchase
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
                       }`}
                   >
-                    {!address ? "Connect Wallet" : `💳 Buy for ${parseFloat(displayPrice).toFixed(2)} USDFC`}
+                    {!address
+                      ? "Connect Wallet"
+                      : !canPurchase
+                        ? "❌ Purchase Unavailable"
+                        : `💳 Buy for ${parseFloat(displayPrice).toFixed(2)} USDFC`}
                   </button>
                 )}
                 <button
                   onClick={() => setShowMintModal(true)}
                   disabled={!address}
                   className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!address
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
                     }`}
                 >
                   {!address ? "Connect Wallet" : "🪙 Mint NFT License"}
@@ -308,7 +332,7 @@ export default function AssetDetailPage() {
         ownerAddress={contractCreator || asset.owner}
       />
 
-      {displayPrice && parseFloat(displayPrice) > 0 && (
+      {displayPrice && parseFloat(displayPrice) > 0 && canPurchase && (
         <PurchaseModal
           isOpen={showPurchaseModal}
           onClose={() => setShowPurchaseModal(false)}

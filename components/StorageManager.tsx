@@ -39,9 +39,9 @@ export const StorageManager = () => {
   const [showDepositModal, setShowDepositModal] = useState(false);
 
   // Check if user has never used warm storage
-  const hasNoWarmStorage = balances?.warmStorageBalance === 0n && 
-                          balances?.currentRateAllowanceGB === 0 && 
-                          balances?.currentLockupAllowance === 0n;
+  const hasNoWarmStorage = balances?.warmStorageBalance === 0n &&
+    balances?.currentRateAllowanceGB === 0 &&
+    balances?.currentLockupAllowance === 0n;
 
   const handleRefetchBalances = async () => {
     await refetchBalances();
@@ -162,7 +162,7 @@ export const StorageManager = () => {
             <div>
               <h3 className="text-xl font-bold mb-2">🚀 Setup Required</h3>
               <p className="text-orange-100 text-sm">
-                You haven't setup warm storage yet. Deposit USDFC to get started.
+                You haven&apos;t setup warm storage yet. Deposit USDFC to get started.
               </p>
             </div>
             <button
@@ -200,13 +200,12 @@ export const StorageManager = () => {
           />
           {status && (
             <div
-              className={`p-4 rounded-xl font-medium ${
-                status.includes("❌")
+              className={`p-4 rounded-xl font-medium ${status.includes("❌")
                   ? "bg-red-50 border-2 border-red-200 text-red-800"
                   : status.includes("✅")
-                  ? "bg-green-50 border-2 border-green-200 text-green-800"
-                  : "bg-blue-50 border-2 border-blue-200 text-blue-800"
-              }`}
+                    ? "bg-green-50 border-2 border-green-200 text-green-800"
+                    : "bg-blue-50 border-2 border-blue-200 text-blue-800"
+                }`}
             >
               {status}
             </div>
@@ -214,9 +213,9 @@ export const StorageManager = () => {
         </div>
       </div>
 
-      <DepositModal 
-        isOpen={showDepositModal} 
-        onClose={() => setShowDepositModal(false)} 
+      <DepositModal
+        isOpen={showDepositModal}
+        onClose={() => setShowDepositModal(false)}
       />
     </div>
   );
@@ -310,9 +309,8 @@ const ActionSection = ({
     return (
       <div className="space-y-4">
         <div
-          className={`p-4 bg-red-50 rounded-lg border border-red-200 ${
-            balances.filBalance === 0n ? "block" : "hidden"
-          }`}
+          className={`p-4 bg-red-50 rounded-lg border border-red-200 ${balances.filBalance === 0n ? "block" : "hidden"
+            }`}
         >
           <p className="text-red-800">
             ⚠️ You need to FIL tokens to pay for transaction fees. Please
@@ -320,9 +318,8 @@ const ActionSection = ({
           </p>
         </div>
         <div
-          className={`p-4 bg-red-50 rounded-lg border border-red-200 ${
-            balances.usdfcBalance === 0n ? "block" : "hidden"
-          }`}
+          className={`p-4 bg-red-50 rounded-lg border border-red-200 ${balances.usdfcBalance === 0n ? "block" : "hidden"
+            }`}
         >
           <p className="text-red-800">
             ⚠️ You need to USDFC tokens to pay for storage. Please deposit USDFC
@@ -371,11 +368,10 @@ const ActionSection = ({
               await handleRefetchBalances();
             }}
             disabled={isProcessingPayment}
-            className={`w-full px-6 py-3 rounded-lg border-2 border-black transition-all ${
-              isProcessingPayment
+            className={`w-full px-6 py-3 rounded-lg border-2 border-black transition-all ${isProcessingPayment
                 ? "bg-gray-200 border-gray-200 text-gray-400 cursor-not-allowed"
                 : "bg-black text-white hover:bg-white hover:text-black"
-            }`}
+              }`}
           >
             {isProcessingPayment
               ? "Processing transactions..."
@@ -424,11 +420,10 @@ const LockupIncreaseAction = ({
           await handleRefetchBalances();
         }}
         disabled={isProcessingPayment}
-        className={`w-full px-6 py-3 rounded-lg border-2 border-black transition-all ${
-          isProcessingPayment
+        className={`w-full px-6 py-3 rounded-lg border-2 border-black transition-all ${isProcessingPayment
             ? "bg-gray-200 border-gray-200 text-gray-400 cursor-not-allowed"
             : "bg-black text-white hover:bg-white hover:text-black"
-        }`}
+          }`}
       >
         {isProcessingPayment
           ? "Processing transactions..."
@@ -467,11 +462,10 @@ const RateIncreaseAction = ({
           await handleRefetchBalances();
         }}
         disabled={isProcessingPayment}
-        className={`w-full px-6 py-3 rounded-lg border-2 border-black transition-all ${
-          isProcessingPayment
+        className={`w-full px-6 py-3 rounded-lg border-2 border-black transition-all ${isProcessingPayment
             ? "bg-gray-200 border-gray-200 text-gray-400 cursor-not-allowed"
             : "bg-black text-white hover:bg-white hover:text-black"
-        }`}
+          }`}
       >
         {isProcessingPayment ? "Increasing Rate..." : "Increase Rate"}
       </button>
@@ -584,7 +578,7 @@ const WalletBalancesSection = ({ balances, isLoading }: SectionProps) => (
  */
 const StorageStatusSection = ({ balances, isLoading }: SectionProps) => {
   const usagePercent = balances ? (balances.currentStorageGB / balances.currentRateAllowanceGB) * 100 : 0;
-  
+
   return (
     <div>
       <h4 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">Storage Status</h4>
@@ -597,7 +591,7 @@ const StorageStatusSection = ({ balances, isLoading }: SectionProps) => {
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
-            <div 
+            <div
               className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
               style={{ width: `${Math.min(usagePercent, 100)}%` }}
             />
@@ -611,7 +605,7 @@ const StorageStatusSection = ({ balances, isLoading }: SectionProps) => {
             </span>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
             <div className="flex items-center gap-2 mb-2">
@@ -625,7 +619,7 @@ const StorageStatusSection = ({ balances, isLoading }: SectionProps) => {
               at {balances?.currentRateAllowanceGB?.toLocaleString()} GB
             </div>
           </div>
-          
+
           <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-2xl">✅</span>

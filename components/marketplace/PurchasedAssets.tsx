@@ -64,7 +64,7 @@ export const PurchasedAssets = () => {
 const PurchasedAssetCard = ({ purchase, index }: { purchase: any; index: number }) => {
   const filename = `purchased-asset-${purchase.pieceCid}.png`;
   const { downloadMutation } = useDownloadPiece(purchase.pieceCid, filename);
-  const { verifyLicense, isVerifying } = useLicenseVerification();
+  const { hasLicense, isLoading: isVerifying } = useLicenseVerification(purchase.datasetId);
   const [showLicense, setShowLicense] = useState(false);
 
   const handleDownload = () => {
@@ -72,7 +72,6 @@ const PurchasedAssetCard = ({ purchase, index }: { purchase: any; index: number 
   };
 
   const handleVerifyLicense = async () => {
-    await verifyLicense(purchase.datasetId, purchase.pieceId);
     setShowLicense(true);
   };
 
@@ -141,7 +140,7 @@ const PurchasedAssetCard = ({ purchase, index }: { purchase: any; index: number 
               <p><span className="font-semibold">Valid Until:</span> Lifetime</p>
               <p><span className="font-semibold">Rights:</span> Download, Use, Modify</p>
               {purchase.txHash && (
-                <p><span className="font-semibold">TX Hash:</span> 
+                <p><span className="font-semibold">TX Hash:</span>
                   <span className="font-mono text-xs ml-1">{purchase.txHash.slice(0, 10)}...</span>
                 </p>
               )}

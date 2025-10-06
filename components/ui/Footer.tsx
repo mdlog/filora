@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -21,10 +22,10 @@ export default function Footer() {
           <div>
             <h4 className="font-bold mb-4">Marketplace</h4>
             <ul className="space-y-2 text-sm opacity-90">
-              <li><a href="/?tab=marketplace" className="hover:underline">Browse Assets</a></li>
-              <li><a href="/?tab=upload" className="hover:underline">Upload Asset</a></li>
-              <li><a href="/?tab=my-assets" className="hover:underline">My Assets</a></li>
-              <li><a href="/?tab=storage" className="hover:underline">Storage</a></li>
+              <li><Link href="/?tab=marketplace" className="hover:underline">Browse Assets</Link></li>
+              <li><Link href="/?tab=upload" className="hover:underline">Upload Asset</Link></li>
+              <li><Link href="/?tab=my-assets" className="hover:underline">My Assets</Link></li>
+              <li><Link href="/?tab=storage" className="hover:underline">Storage</Link></li>
             </ul>
           </div>
 

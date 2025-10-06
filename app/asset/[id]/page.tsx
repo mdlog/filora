@@ -34,7 +34,7 @@ export default function AssetDetailPage() {
     name: `Digital Asset #${pieceId}`,
     description: "Exclusive digital asset stored permanently on Filecoin blockchain via Synapse SDK. Verified on-chain with decentralized storage.",
     price: 25,
-    owner: assetData?.payer || assetData?.data?.payer || "Unknown",
+    owner: assetData?.payer || (assetData?.data as any)?.payer || "Unknown",
     pieceCid: pieceData?.pieceCid?.toString() || "Loading...",
     created: new Date().toISOString().split('T')[0],
     category: "Digital Asset",
@@ -191,8 +191,8 @@ export default function AssetDetailPage() {
                     onClick={() => setShowPurchaseModal(true)}
                     disabled={!canAfford || !address}
                     className={`py-4 rounded-xl font-bold text-lg transition-all ${!canAfford || !address
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
                       }`}
                   >
                     {!address ? "Connect Wallet" : !canAfford ? "Insufficient Balance" : `💳 Buy ${totalPrice} USDFC`}
@@ -201,8 +201,8 @@ export default function AssetDetailPage() {
                     onClick={() => setShowMintModal(true)}
                     disabled={!address}
                     className={`py-4 rounded-xl font-bold text-lg transition-all ${!address
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
                       }`}
                   >
                     🪙 Mint NFT
@@ -252,7 +252,7 @@ export default function AssetDetailPage() {
       <NFTMintModal
         isOpen={showMintModal}
         onClose={() => setShowMintModal(false)}
-        assetId={assetId}
+        assetId={Number(assetId)}
         assetName={asset.name}
       />
 

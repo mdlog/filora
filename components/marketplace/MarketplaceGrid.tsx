@@ -32,8 +32,8 @@ export const MarketplaceGrid = () => {
 
     // Get owner address from available sources
     const owner = dataset.payer ||
-      dataset.data?.payer ||
-      dataset.provider?.address ||
+      (dataset.data as any)?.payer ||
+      (dataset.provider as any)?.address ||
       dataset.payee;
 
     console.log(`Dataset ${dataset.pdpVerifierDataSetId} (${dataset.provider?.name}): owner=${owner}, pieces=${dataset.data.pieces.length}`);
@@ -57,6 +57,11 @@ export const MarketplaceGrid = () => {
     if (address.length < 10) return address;
     if (!address.startsWith("0x")) return address.slice(0, 10) + "...";
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const formatCID = (cid: string) => {
+    if (!cid || cid.length < 20) return cid;
+    return `${cid.slice(0, 10)}...${cid.slice(-6)}`;
   };
 
   // Group assets by owner
@@ -197,8 +202,8 @@ export const MarketplaceGrid = () => {
                 <button
                   onClick={() => setFilterStatus("all")}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === "all"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                 >
                   All
@@ -206,8 +211,8 @@ export const MarketplaceGrid = () => {
                 <button
                   onClick={() => setFilterStatus("live")}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === "live"
-                      ? "bg-green-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                 >
                   Live
@@ -215,8 +220,8 @@ export const MarketplaceGrid = () => {
                 <button
                   onClick={() => setFilterStatus("inactive")}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === "inactive"
-                      ? "bg-gray-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-gray-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                 >
                   Inactive
@@ -254,8 +259,8 @@ export const MarketplaceGrid = () => {
               <button
                 onClick={() => setViewMode("grid")}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${viewMode === "grid"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
               >
                 <span>🔲</span> Grid View
@@ -263,8 +268,8 @@ export const MarketplaceGrid = () => {
               <button
                 onClick={() => setViewMode("by-owner")}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${viewMode === "by-owner"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
               >
                 <span>👥</span> By Owner
@@ -377,31 +382,48 @@ export const MarketplaceGrid = () => {
                         </div>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-semibold ${asset.isLive
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-200 text-gray-700"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-200 text-gray-700"
                             }`}
                         >
                           {asset.isLive ? "✅" : "⏸️"}
                         </span>
                       </div>
-                      <h4 className="font-bold text-gray-800 text-sm mb-1">Asset #{asset.pieceId}</h4>
-                      <p className="text-xs text-gray-500 truncate mb-2">CID: {asset.pieceCid.slice(0, 20)}...</p>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-xs">
-                          <span>✍️</span>
-                          <span className="text-gray-500">Author:</span>
-                          <span className="text-gray-700 font-mono truncate">{formatAddress(asset.owner)}</span>
+                      <h4 className="font-bold text-gray-800 text-sm mb-2">Asset #{asset.pieceId}</h4>
+
+                      {/* 2-Column Grid Layout for By Owner View */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {/* Row 1: CID | Author */}
+                        <div className="min-w-0">
+                          <p className="text-gray-500 mb-0.5">🔗 CID</p>
+                          <p className="text-gray-700 font-mono truncate" title={asset.pieceCid}>
+                            {formatCID(asset.pieceCid)}
+                          </p>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                          <span>🏢</span>
-                          <span className="truncate">{asset.provider}</span>
+                        <div className="min-w-0">
+                          <p className="text-gray-500 mb-0.5">✍️ Author</p>
+                          <p className="text-gray-700 font-mono truncate" title={asset.owner}>
+                            {formatAddress(asset.owner)}
+                          </p>
                         </div>
-                        {asset.price !== undefined && asset.price > 0 && (
-                          <div className="flex items-center gap-2 text-xs">
-                            <span>💰</span>
-                            <span className="text-gray-800 font-bold">{(asset.price / 1e18).toFixed(2)} USDFC</span>
-                          </div>
-                        )}
+
+                        {/* Row 2: Provider | Price */}
+                        <div className="min-w-0">
+                          <p className="text-gray-500 mb-0.5">🏢 Provider</p>
+                          <p className="text-gray-700 truncate" title={asset.provider}>
+                            {asset.provider}
+                          </p>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-gray-500 mb-0.5">
+                            {asset.price !== undefined && asset.price > 0 ? "💰 Price" : "🆓 Price"}
+                          </p>
+                          <p className={`font-bold truncate ${asset.price !== undefined && asset.price > 0 ? "text-gray-800" : "text-green-600"}`}>
+                            {asset.price !== undefined && asset.price > 0
+                              ? `${(asset.price / 1e18).toFixed(2)} USDFC`
+                              : "Free"}
+                          </p>
+                        </div>
                       </div>
                     </motion.div>
                   ))}
@@ -481,39 +503,67 @@ export const MarketplaceGrid = () => {
                       <h3 className="text-lg font-bold text-gray-800">Asset #{asset.pieceId}</h3>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${asset.isLive
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-700"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-700"
                           }`}
                       >
                         {asset.isLive ? "✅ Live" : "⏸️ Inactive"}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 mb-3 truncate">CID: {asset.pieceCid}</p>
-                    <div className="space-y-2 mb-3">
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-400">✍️</span>
-                        <div className="flex-1">
-                          <p className="text-xs text-gray-500">Author</p>
-                          <p className="text-gray-600 font-mono text-xs truncate">{formatAddress(asset.owner)}</p>
+
+                    {/* 2-Column Grid Layout */}
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      {/* Row 1: CID | Author */}
+                      <div className="flex items-start gap-2">
+                        <span className="text-gray-400 text-sm">🔗</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 mb-0.5">CID</p>
+                          <p className="text-gray-700 font-mono text-xs truncate" title={asset.pieceCid}>
+                            {formatCID(asset.pieceCid)}
+                          </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-400">🏢</span>
-                        <div className="flex-1">
-                          <p className="text-xs text-gray-500">Provider</p>
-                          <p className="text-gray-600 text-xs truncate">{asset.provider}</p>
+                      <div className="flex items-start gap-2">
+                        <span className="text-gray-400 text-sm">✍️</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 mb-0.5">Author</p>
+                          <p className="text-gray-700 font-mono text-xs truncate" title={asset.owner}>
+                            {formatAddress(asset.owner)}
+                          </p>
                         </div>
                       </div>
-                      {asset.price !== undefined && asset.price > 0 && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="text-gray-400">💰</span>
-                          <div className="flex-1">
-                            <p className="text-xs text-gray-500">Price</p>
-                            <p className="text-gray-800 font-bold text-sm">{(asset.price / 1e18).toFixed(2)} USDFC</p>
+
+                      {/* Row 2: Provider | Price */}
+                      <div className="flex items-start gap-2">
+                        <span className="text-gray-400 text-sm">🏢</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 mb-0.5">Provider</p>
+                          <p className="text-gray-700 text-xs truncate" title={asset.provider}>
+                            {asset.provider}
+                          </p>
+                        </div>
+                      </div>
+                      {asset.price !== undefined && asset.price > 0 ? (
+                        <div className="flex items-start gap-2">
+                          <span className="text-gray-400 text-sm">💰</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-gray-500 mb-0.5">Price</p>
+                            <p className="text-gray-800 font-bold text-xs">
+                              {(asset.price / 1e18).toFixed(2)} USDFC
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-2">
+                          <span className="text-gray-400 text-sm">🆓</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-gray-500 mb-0.5">Price</p>
+                            <p className="text-green-600 font-bold text-xs">Free</p>
                           </div>
                         </div>
                       )}
                     </div>
+
                     <div className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-xl font-semibold text-center">
                       View Details
                     </div>
@@ -574,8 +624,8 @@ export const MarketplaceGrid = () => {
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={`w-10 h-10 rounded-xl font-semibold transition-all ${currentPage === page
-                            ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
-                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                           }`}
                       >
                         {page}

@@ -50,114 +50,114 @@ export const MyAssets = () => {
   return (
     <div className="space-y-6">
       {currentDatasets.map((dataset, index) => (
-          <motion.div
-            key={dataset.clientDataSetId}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-2xl shadow-xl overflow-hidden"
-          >
-            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 text-white">
-              <div className="flex justify-between items-start">
+        <motion.div
+          key={dataset.clientDataSetId}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+          className="bg-white rounded-2xl shadow-xl overflow-hidden"
+        >
+          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 text-white">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Dataset #{dataset.pdpVerifierDataSetId}</h3>
+                <div className="flex items-center gap-4 text-sm opacity-90">
+                  <span className="flex items-center gap-1">
+                    {dataset.isLive ? "✅" : "⏸️"} {dataset.isLive ? "Live" : "Inactive"}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    {dataset.withCDN ? "⚡" : "📦"} {dataset.withCDN ? "CDN Enabled" : "Standard"}
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm opacity-80">Commission</p>
+                <p className="text-2xl font-bold">{dataset.commissionBps / 100}%</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <InfoCard icon="📦" label="Pieces" value={dataset.currentPieceCount} />
+              <InfoCard icon="🆔" label="Next Piece ID" value={dataset.nextPieceId} />
+              <InfoCard
+                icon="🏪"
+                label="Provider"
+                value={dataset.provider?.name || "Unknown"}
+              />
+            </div>
+
+            {dataset.provider?.products.PDP?.data.serviceURL && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-xl">
+                <p className="text-sm text-gray-600 mb-2">PDP Service URL</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-mono text-gray-800 flex-1 truncate">
+                    {dataset.provider.products.PDP.data.serviceURL}
+                  </p>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        dataset.provider?.products.PDP?.data.serviceURL || ""
+                      );
+                      alert("PDP URL copied!");
+                    }}
+                    className="px-3 py-1 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {dataset.data?.pieces && dataset.data.pieces.length > 0 && (() => {
+              const datasetKey = dataset.clientDataSetId;
+              const currentPiecePage = piecesPages[datasetKey] || 1;
+              const totalPiecePages = Math.ceil(dataset.data.pieces.length / piecesPerPage);
+              const startIdx = (currentPiecePage - 1) * piecesPerPage;
+              const endIdx = startIdx + piecesPerPage;
+              const currentPieces = dataset.data.pieces.slice(startIdx, endIdx);
+
+              return (
                 <div>
-                  <h3 className="text-2xl font-bold mb-2">Dataset #{dataset.pdpVerifierDataSetId}</h3>
-                  <div className="flex items-center gap-4 text-sm opacity-90">
-                    <span className="flex items-center gap-1">
-                      {dataset.isLive ? "✅" : "⏸️"} {dataset.isLive ? "Live" : "Inactive"}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      {dataset.withCDN ? "⚡" : "📦"} {dataset.withCDN ? "CDN Enabled" : "Standard"}
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-lg font-bold text-gray-800">Available Pieces</h4>
+                    <span className="text-sm text-gray-600">
+                      Next Challenge: Epoch {dataset.data.nextChallengeEpoch}
                     </span>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm opacity-80">Commission</p>
-                  <p className="text-2xl font-bold">{dataset.commissionBps / 100}%</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <InfoCard icon="📦" label="Pieces" value={dataset.currentPieceCount} />
-                <InfoCard icon="🆔" label="Next Piece ID" value={dataset.nextPieceId} />
-                <InfoCard
-                  icon="🏪"
-                  label="Provider"
-                  value={dataset.provider?.name || "Unknown"}
-                />
-              </div>
-
-              {dataset.provider?.products.PDP?.data.serviceURL && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-600 mb-2">PDP Service URL</p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs font-mono text-gray-800 flex-1 truncate">
-                      {dataset.provider.products.PDP.data.serviceURL}
-                    </p>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          dataset.provider?.products.PDP?.data.serviceURL || ""
-                        );
-                        alert("PDP URL copied!");
-                      }}
-                      className="px-3 py-1 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700"
-                    >
-                      Copy
-                    </button>
+                  <div className="space-y-3">
+                    {currentPieces.map((piece) => (
+                      <PieceCard key={piece.pieceId} piece={piece} ownerAddress={dataset.payer || (dataset.data as any)?.payer} />
+                    ))}
                   </div>
-                </div>
-              )}
-
-              {dataset.data?.pieces && dataset.data.pieces.length > 0 && (() => {
-                const datasetKey = dataset.clientDataSetId;
-                const currentPiecePage = piecesPages[datasetKey] || 1;
-                const totalPiecePages = Math.ceil(dataset.data.pieces.length / piecesPerPage);
-                const startIdx = (currentPiecePage - 1) * piecesPerPage;
-                const endIdx = startIdx + piecesPerPage;
-                const currentPieces = dataset.data.pieces.slice(startIdx, endIdx);
-
-                return (
-                  <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-lg font-bold text-gray-800">Available Pieces</h4>
+                  {totalPiecePages > 1 && (
+                    <div className="mt-4 flex items-center justify-between bg-gray-50 rounded-xl p-3">
+                      <button
+                        onClick={() => setPiecesPages(prev => ({ ...prev, [datasetKey]: Math.max(1, currentPiecePage - 1) }))}
+                        disabled={currentPiecePage === 1}
+                        className="px-3 py-1 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-indigo-600 text-white hover:bg-indigo-700"
+                      >
+                        Previous
+                      </button>
                       <span className="text-sm text-gray-600">
-                        Next Challenge: Epoch {dataset.data.nextChallengeEpoch}
+                        Page {currentPiecePage} of {totalPiecePages} ({dataset.data.pieces.length} pieces)
                       </span>
+                      <button
+                        onClick={() => setPiecesPages(prev => ({ ...prev, [datasetKey]: Math.min(totalPiecePages, currentPiecePage + 1) }))}
+                        disabled={currentPiecePage === totalPiecePages}
+                        className="px-3 py-1 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-indigo-600 text-white hover:bg-indigo-700"
+                      >
+                        Next
+                      </button>
                     </div>
-                    <div className="space-y-3">
-                      {currentPieces.map((piece) => (
-                        <PieceCard key={piece.pieceId} piece={piece} ownerAddress={dataset.payer || dataset.data?.payer} />
-                      ))}
-                    </div>
-                    {totalPiecePages > 1 && (
-                      <div className="mt-4 flex items-center justify-between bg-gray-50 rounded-xl p-3">
-                        <button
-                          onClick={() => setPiecesPages(prev => ({ ...prev, [datasetKey]: Math.max(1, currentPiecePage - 1) }))}
-                          disabled={currentPiecePage === 1}
-                          className="px-3 py-1 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-indigo-600 text-white hover:bg-indigo-700"
-                        >
-                          Previous
-                        </button>
-                        <span className="text-sm text-gray-600">
-                          Page {currentPiecePage} of {totalPiecePages} ({dataset.data.pieces.length} pieces)
-                        </span>
-                        <button
-                          onClick={() => setPiecesPages(prev => ({ ...prev, [datasetKey]: Math.min(totalPiecePages, currentPiecePage + 1) }))}
-                          disabled={currentPiecePage === totalPiecePages}
-                          className="px-3 py-1 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-indigo-600 text-white hover:bg-indigo-700"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-          </motion.div>
-        ))}
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        </motion.div>
+      ))}
 
       {totalPages > 1 && (
         <motion.div
@@ -182,11 +182,10 @@ export const MyAssets = () => {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`w-10 h-10 rounded-xl font-semibold transition-all ${
-                    currentPage === page
+                  className={`w-10 h-10 rounded-xl font-semibold transition-all ${currentPage === page
                       ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
                       : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>

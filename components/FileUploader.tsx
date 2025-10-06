@@ -51,13 +51,11 @@ export const FileUploader = () => {
   return (
     <div className="mt-4 p-6">
       <div
-        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          isDragging
+        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragging
             ? "border-blue-500 bg-blue-50"
             : "border-gray-300 hover:border-gray-400"
-        } ${
-          isUploading ? "cursor-not-allowed text-gray-400" : "cursor-pointer"
-        }`}
+          } ${isUploading ? "cursor-not-allowed text-gray-400" : "cursor-pointer"
+          }`}
         onDragEnter={handleDragIn}
         onDragLeave={handleDragOut}
         onDragOver={handleDrag}
@@ -78,9 +76,8 @@ export const FileUploader = () => {
         />
         <div className="flex flex-col items-center gap-2">
           <svg
-            className={`w-10 h-10 ${
-              isDragging ? "text-blue-500" : "text-gray-400"
-            }`}
+            className={`w-10 h-10 ${isDragging ? "text-blue-500" : "text-gray-400"
+              }`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -107,7 +104,7 @@ export const FileUploader = () => {
         <button
           onClick={async () => {
             if (!file) return;
-            await uploadFile(file);
+            await uploadFile({ file });
             // Refetch marketplace data after upload
             setTimeout(() => {
               queryClient.invalidateQueries({ queryKey: ["all-datasets"] });
@@ -116,18 +113,17 @@ export const FileUploader = () => {
           disabled={!file || isUploading || !!uploadedInfo}
           aria-disabled={!file || isUploading}
           className={`px-6 py-2 rounded-[20px] text-center border-2 transition-all
-            ${
-              !file || isUploading || uploadedInfo
-                ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                : "border-secondary text-secondary hover:bg-secondary/70 hover:text-secondary-foreground focus:outline-none focus:ring-2 focus:ring-secondary/50 hover:border-secondary/70 hover:cursor-pointer"
+            ${!file || isUploading || uploadedInfo
+              ? "border-gray-200 text-gray-400 cursor-not-allowed"
+              : "border-secondary text-secondary hover:bg-secondary/70 hover:text-secondary-foreground focus:outline-none focus:ring-2 focus:ring-secondary/50 hover:border-secondary/70 hover:cursor-pointer"
             }
           `}
         >
           {isUploading
             ? "Uploading..."
             : !uploadedInfo
-            ? "Submit"
-            : "Submitted"}
+              ? "Submit"
+              : "Submitted"}
         </button>
         <button
           onClick={() => {
@@ -137,10 +133,9 @@ export const FileUploader = () => {
           disabled={!file || isUploading}
           aria-disabled={!file || isUploading}
           className={`px-6 py-2 rounded-[20px] text-center border-2 transition-all
-            ${
-              !file || isUploading
-                ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                : "border-secondary text-secondary hover:bg-secondary/70 hover:text-secondary-foreground focus:outline-none focus:ring-2 focus:ring-secondary/50 hover:border-secondary/70 hover:cursor-pointer"
+            ${!file || isUploading
+              ? "border-gray-200 text-gray-400 cursor-not-allowed"
+              : "border-secondary text-secondary hover:bg-secondary/70 hover:text-secondary-foreground focus:outline-none focus:ring-2 focus:ring-secondary/50 hover:border-secondary/70 hover:cursor-pointer"
             }
           `}
         >
@@ -151,10 +146,9 @@ export const FileUploader = () => {
         <div className="mt-4 text-center">
           <p
             className={`text-sm
-              ${
-                status.includes("❌")
-                  ? "text-red-500"
-                  : status.includes("✅") || status.includes("🎉")
+              ${status.includes("❌")
+                ? "text-red-500"
+                : status.includes("✅") || status.includes("🎉")
                   ? "text-green-500"
                   : "text-secondary"
               }
