@@ -1,22 +1,22 @@
-# 🚀 Filora - Status Aplikasi Terkini
+# 🚀 Filora - Current Application Status
 
-**Tanggal Update:** Oktober 2025  
-**Status:** ✅ AKTIF DAN BERJALAN  
+**Last Updated:** October 2025  
+**Status:** ✅ ACTIVE AND OPERATIONAL  
 **Network:** Filecoin Calibration Testnet (Chain ID: 314159)  
 **URL:** http://localhost:3004
 
 ---
 
-## 📊 Status Deployment
+## 📊 Deployment Status
 
-### ✅ Aplikasi Frontend
-- **Framework:** Next.js 15.3.2 dengan Turbopack
-- **Status:** Berjalan di port 3004
-- **Package Manager:** Yarn (direkomendasikan untuk efisiensi disk space)
-- **Build Tool:** Turbopack (optimized bundler dari Next.js)
+### ✅ Frontend Application
+- **Framework:** Next.js 15.3.2 with Turbopack
+- **Status:** Running on port 3004
+- **Package Manager:** Yarn (recommended for disk space efficiency)
+- **Build Tool:** Turbopack (optimized bundler from Next.js)
 
 ### ✅ Smart Contracts
-Semua smart contract telah berhasil di-deploy ke Filecoin Calibration:
+All smart contracts have been successfully deployed to Filecoin Calibration:
 
 | Contract | Address | Status |
 |----------|---------|--------|
@@ -28,28 +28,38 @@ Semua smart contract telah berhasil di-deploy ke Filecoin Calibration:
 
 ---
 
-## 🎯 Fitur yang Tersedia
+## 🎯 Available Features
 
 ### Core Marketplace Features
-- ✅ **Browse Marketplace** - Lihat semua digital assets dalam grid/list view
-- ✅ **Search & Filter** - Cari asset berdasarkan CID, Asset ID, Provider
-- ✅ **Upload Assets** - Upload file dengan metadata (nama, deskripsi, harga)
-- ✅ **My Assets** - Kelola koleksi asset pribadi dengan pagination
-- ✅ **Asset Preview** - Lihat preview gambar via Filbeam CDN
-- ✅ **Download Assets** - Download file dari Filecoin storage
+- ✅ **Browse Marketplace** - View all digital assets in grid/list view
+- ✅ **Search & Filter** - Search assets by CID, Asset ID, Provider
+- ✅ **Upload Assets** - Upload files with metadata (name, description, price)
+- ✅ **My Assets** - Manage personal asset collection with pagination
+- ✅ **Asset Preview** - View image previews via Filbeam CDN
+- ✅ **Download Assets** - Download files from Filecoin storage
+- ✅ **Purchased Assets** - View and download purchased assets
+- ✅ **Pagination** - 10 assets per page in marketplace
 
 ### Smart Contract Features
-- ✅ **NFT Minting** - Mint ERC-1155 NFT licenses untuk digital assets
-- ✅ **Buy/Sell Assets** - Beli asset dengan USDFC token
-- ✅ **Royalty Distribution** - Automatic royalty ke creator
-- ✅ **License Verification** - Verifikasi kepemilikan license on-chain
-- ✅ **Withdraw Royalties** - Tarik royalty earnings
+- ✅ **NFT Minting** - Mint ERC-1155 NFT licenses for digital assets
+- ✅ **Buy/Sell Assets** - Purchase assets with USDFC token
+- ✅ **Royalty Distribution** - Automatic royalties to creators
+- ✅ **License Verification** - Verify license ownership on-chain
+- ✅ **Withdraw Royalties** - Withdraw royalty earnings
+- ✅ **Asset Registry** - On-chain marketplace registration with price storage
 
 ### Storage & Payment
-- ✅ **Storage Management** - Monitor dan bayar Filecoin storage
-- ✅ **Balance Checking** - Lihat FIL dan USDFC balance
-- ✅ **Payment Processing** - USDFC payment dengan approval flow
-- ✅ **Transaction History** - Lacak semua transaksi
+- ✅ **Storage Management** - Monitor and pay for Filecoin storage
+- ✅ **Balance Checking** - View FIL and USDFC balances
+- ✅ **Payment Processing** - USDFC payment with approval flow
+- ✅ **Transaction History** - Track all transactions
+- ✅ **Balance Validation** - Pre-transaction balance checks
+
+### Dashboard & Profile
+- ✅ **Dashboard** - View stats for purchased and uploaded assets
+- ✅ **Profile Picture** - Upload and set profile image
+- ✅ **Username** - Set and display username
+- ✅ **Asset Statistics** - Track total assets, spending, and earnings
 
 ---
 
@@ -81,106 +91,153 @@ Semua smart contract telah berhasil di-deploy ke Filecoin Calibration:
 
 ---
 
-## 📝 Cara Menggunakan
+## 📝 How to Use
 
-### 1. Jalankan Aplikasi
+### 1. Run Application
 ```bash
-# Menggunakan Yarn (direkomendasikan)
+# Using Yarn (recommended)
 yarn dev
 
-# Atau menggunakan npm
+# Or using npm
 npm run dev
 ```
 
-Aplikasi akan otomatis berjalan di port yang tersedia:
+Application will automatically run on an available port:
 - Default: http://localhost:3000
-- Jika port 3000 terpakai: http://localhost:3004
+- If port 3000 is in use: http://localhost:3004
 
 ### 2. Connect Wallet
-1. Klik tombol "Connect Wallet"
-2. Pilih MetaMask atau wallet lainnya
-3. Switch ke Filecoin Calibration network (Chain ID: 314159)
-4. Approve koneksi
+1. Click "Connect Wallet" button
+2. Select MetaMask or another wallet
+3. Switch to Filecoin Calibration network (Chain ID: 314159)
+4. Approve connection
 
 ### 3. Get Testnet Tokens
-- **tFIL** (untuk gas): https://faucet.calibnet.chainsafe-fil.io/funds.html
-- **USDFC** (untuk payment): https://forest-explorer.chainsafe.dev/faucet/calibnet_usdfc
+- **tFIL** (for gas): https://faucet.calibnet.chainsafe-fil.io/funds.html
+- **USDFC** (for payments): https://forest-explorer.chainsafe.dev/faucet/calibnet_usdfc
 
 ### 4. Browse & Upload
-- Tab **Marketplace**: Browse semua assets
-- Tab **Upload Asset**: Upload file baru dengan price
-- Tab **My Assets**: Lihat asset Anda
-- Tab **Storage**: Manage storage balance
-- Tab **Royalties**: Tarik earnings
+- **Marketplace** tab: Browse all assets
+- **Upload Asset** tab: Upload new files with price
+- **My Assets** tab: View your assets
+- **Purchased** tab: View purchased assets
+- **Dashboard** tab: View statistics and profile
+- **Storage** tab: Manage storage balance
 
 ### 5. Buy & Mint NFTs
-1. Klik asset di marketplace
-2. Klik **Buy** untuk membeli
-3. Klik **Mint NFT** untuk mint license
-4. Approve transactions di wallet
+1. Click asset in marketplace
+2. Click **Buy** to purchase
+3. Click **Mint NFT** to mint license
+4. Approve transactions in wallet
 
 ---
 
-## 🎨 Perubahan Terbaru
+## 🎨 Recent Changes
+
+### Purchase Error Fix (October 2025)
+- ✅ Added balance validation before transactions
+- ✅ Enhanced error messages with specific solutions
+- ✅ Transaction confirmation delays
+- ✅ Comprehensive logging for debugging
+- ✅ User-friendly error display
+
+### Dashboard Features (October 2025)
+- ✅ Profile picture upload
+- ✅ Username customization
+- ✅ Purchased assets statistics
+- ✅ Uploaded assets statistics
+- ✅ Balance display
+
+### Marketplace Improvements (October 2025)
+- ✅ Pagination with 10 assets per page
+- ✅ Page navigation with clear indicators
+- ✅ Improved asset grid layout
+- ✅ Better filtering and sorting
+
+### Upload Enhancements (October 2025)
+- ✅ Duplicate asset detection
+- ✅ Dataset tracking improvements
+- ✅ Registry confirmation flow
+- ✅ Better error handling for contract reverts
+- ✅ Query invalidation for real-time updates
 
 ### Package Manager
-- ✅ Migrasi dari npm ke **Yarn** untuk efisiensi disk space
-- ✅ Yarn lebih cepat dan hemat ruang dibanding npm
-- ✅ Lockfile yarn.lock sudah di-generate
+- ✅ Migration from npm to **Yarn** for disk space efficiency
+- ✅ Yarn is faster and more space-efficient than npm
+- ✅ Lockfile yarn.lock generated
 
 ### Port Configuration
-- ✅ Aplikasi sekarang auto-detect port yang tersedia
+- ✅ Application now auto-detects available port
 - ✅ Default: 3000, fallback: 3004
-- ✅ Check terminal output untuk port aktual
+- ✅ Check terminal output for actual port
 
 ### Documentation Updates
-- ✅ README.md - Updated dengan Yarn instructions
-- ✅ DEPLOYMENT_GUIDE.md - Tambah opsi Yarn
-- ✅ SMART_CONTRACTS.md - Update status deployment
-- ✅ DEPLOYED_CONTRACTS.md - Update alamat contract yang benar
-- ✅ STATUS.md (file ini) - Summary status terkini
+- ✅ README.md - Updated with Yarn instructions
+- ✅ DEPLOYMENT_GUIDE.md - Added Yarn options
+- ✅ SMART_CONTRACTS.md - Updated deployment status
+- ✅ DEPLOYED_CONTRACTS.md - Updated correct contract addresses
+- ✅ BUYER_ACCESS_GUIDE.md - English translation
+- ✅ PURCHASE_TROUBLESHOOTING.md - Purchase error solutions
+- ✅ STATUS.md (this file) - Current status summary
 
 ---
 
 ## 🐛 Troubleshooting
 
 ### Port Already in Use
-**Problem:** Port 3000 sudah terpakai  
-**Solution:** Aplikasi otomatis akan gunakan port berikutnya (3004). Check terminal output.
+**Problem:** Port 3000 already in use  
+**Solution:** Application automatically uses next port (3004). Check terminal output.
 
 ### Disk Space Full
 **Problem:** "ENOSPC: no space left on device"  
 **Solution:**
 ```bash
-# Bersihkan npm cache
+# Clean npm cache
 npm cache clean --force
 
-# Gunakan Yarn (lebih efisien)
+# Use Yarn (more efficient)
 yarn install
 ```
 
 ### Contract Not Working
-**Problem:** NFT/Payment features tidak berfungsi  
+**Problem:** NFT/Payment features not working  
 **Solution:**
-1. Verify contract addresses di `contracts/addresses.ts`
+1. Verify contract addresses in `contracts/addresses.ts`
 2. Restart development server
 3. Clear browser cache
-4. Pastikan wallet di Calibration network
+4. Ensure wallet is on Calibration network
 
 ### Transaction Failing
-**Problem:** Transaction gagal atau rejected  
+**Problem:** Transaction fails or is rejected  
 **Solution:**
-1. Pastikan punya cukup tFIL untuk gas
-2. Check USDFC balance untuk payment
-3. Approve USDFC spending terlebih dahulu
-4. Tunggu beberapa detik antara transactions
+1. Ensure you have enough tFIL for gas
+2. Check USDFC balance for payment
+3. Approve USDFC spending first
+4. Wait a few seconds between transactions
+
+### Purchase Error: "Internal JSON-RPC error"
+**Problem:** Purchase fails with generic error  
+**Solution:**
+1. Check USDFC balance in Dashboard
+2. Get more USDFC from faucet if needed
+3. Ensure you have FIL for gas fees
+4. Confirm both MetaMask popups (Approve + Payment)
+5. See [PURCHASE_TROUBLESHOOTING.md](./PURCHASE_TROUBLESHOOTING.md) for details
+
+### Upload Error: "SysErrContractReverted"
+**Problem:** Asset registration fails after upload  
+**Solution:**
+1. Check if asset already registered for this dataset
+2. System now auto-detects duplicates
+3. File still uploaded to Filecoin even if registration skipped
+4. See [UPLOAD_TROUBLESHOOTING.md](./UPLOAD_TROUBLESHOOTING.md) for details
 
 ---
 
 ## 📊 Performance Metrics
 
 ### Build Performance
-- ✅ **Turbopack:** ~1 second untuk ready
+- ✅ **Turbopack:** ~1 second to ready
 - ✅ **Hot Reload:** Instant updates
 - ✅ **Page Load:** ~5 seconds (first load)
 - ✅ **Route Change:** ~200-400ms
@@ -208,6 +265,9 @@ yarn install
 - **DEPLOYMENT_GUIDE.md** - Contract deployment
 - **SMART_CONTRACTS.md** - Contract integration
 - **DEPLOYED_CONTRACTS.md** - Contract addresses
+- **BUYER_ACCESS_GUIDE.md** - Buyer access guide
+- **PURCHASE_TROUBLESHOOTING.md** - Purchase troubleshooting
+- **UPLOAD_TROUBLESHOOTING.md** - Upload troubleshooting
 - **ROADMAP.md** - Future features
 
 ---
@@ -215,10 +275,10 @@ yarn install
 ## 🎯 Next Steps & Roadmap
 
 ### Phase 2 - Priority Features
-1. **Asset Preview** - Image/video player untuk preview sebelum beli
-2. **User Profiles** - Creator profiles dengan following system
+1. **Asset Preview** - Image/video player for preview before purchase
+2. **User Profiles** - Creator profiles with following system
 3. **Advanced Search** - Filter by price, category, tags
-4. **Auction System** - Bid functionality untuk rare assets
+4. **Auction System** - Bid functionality for rare assets
 
 ### Future Enhancements
 - Mobile app (React Native)
@@ -227,20 +287,20 @@ yarn install
 - Metaverse integration
 - AI recommendations
 
-Lihat [ROADMAP.md](./ROADMAP.md) untuk detail lengkap.
+See [ROADMAP.md](./ROADMAP.md) for complete details.
 
 ---
 
 ## 📞 Support
 
-### Dokumentasi
-- Baca file-file `.md` di root folder
-- Check inline comments di source code
-- Review hooks dan components
+### Documentation
+- Read `.md` files in root folder
+- Check inline comments in source code
+- Review hooks and components
 
 ### Issues
 - Report bugs via GitHub Issues
-- Include error messages dan screenshots
+- Include error messages and screenshots
 - Specify: Browser, Wallet, Network
 
 ### Community
@@ -262,13 +322,17 @@ Lihat [ROADMAP.md](./ROADMAP.md) untuk detail lengkap.
 - [x] License verification working
 - [x] Royalty system active
 - [x] CDN preview working
+- [x] Purchase tracking working
+- [x] Dashboard with profile features
+- [x] Pagination implemented
+- [x] Balance validation active
+- [x] Error handling enhanced
 - [x] Documentation updated
 
-**Status:** Semua sistem operasional dan siap digunakan! 🎉
+**Status:** All systems operational and ready to use! 🎉
 
 ---
 
-**Last Updated:** Oktober 6, 2025  
+**Last Updated:** October 6, 2025  
 **Maintainer:** MDlog Team  
 **License:** MIT
-

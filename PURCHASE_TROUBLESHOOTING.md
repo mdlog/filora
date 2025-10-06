@@ -2,7 +2,42 @@
 
 ## Common Purchase Errors and Solutions
 
-### 1. "Internal JSON-RPC error" during `processPayment`
+### 1. "Insufficient USDFC balance" but you have enough USDFC
+
+**Error Message:**
+```
+Insufficient USDFC balance. You need 1.00 USDFC but only have 0.0 USDFC.
+Please get more USDFC tokens from the faucet.
+```
+
+**Common Cause:**
+
+#### Balance Check Reading Wrong Property (FIXED October 6, 2025)
+- **Symptom**: Error shows 0.0 USDFC even when you have sufficient balance
+- **Root Cause**: Bug in balance validation code (now fixed)
+- **Solution**: 
+  1. Update to latest version of the code
+  2. Refresh the page and reconnect wallet
+  3. Balance should now be read correctly
+  4. If still showing 0.0, check Dashboard tab to verify actual balance
+
+**Verification:**
+- Open browser console (F12)
+- Look for "Balance check:" log
+- Should show:
+  ```javascript
+  Balance check: {
+    required: "1000000000000000000",
+    available: "5000000000000000000",
+    hasEnough: true,
+    priceUSDFC: "1.0",
+    balanceUSDFC: "5.0"
+  }
+  ```
+
+---
+
+### 2. "Internal JSON-RPC error" during `processPayment`
 
 **Error Message:**
 ```

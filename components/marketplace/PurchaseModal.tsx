@@ -44,12 +44,14 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
 
       // Check USDFC balance
       const priceWei = parseEther(price);
-      const usdfcBalance = balances?.usdfc || BigInt(0);
+      const usdfcBalance = balances?.usdfcBalance || BigInt(0);
 
       console.log("Balance check:", {
         required: priceWei.toString(),
         available: usdfcBalance.toString(),
-        hasEnough: usdfcBalance >= priceWei
+        hasEnough: usdfcBalance >= priceWei,
+        priceUSDFC: price,
+        balanceUSDFC: formatEther(usdfcBalance)
       });
 
       if (usdfcBalance < priceWei) {

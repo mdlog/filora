@@ -1,104 +1,104 @@
-# 🔐 Panduan Akses Asset Digital untuk Buyer
+# 🔐 Digital Asset Access Guide for Buyers
 
-Dokumentasi lengkap tentang bagaimana buyer dapat mengakses dan mendownload asset digital yang telah mereka beli di marketplace Filora.
+Complete documentation on how buyers can access and download digital assets they have purchased in the Filora marketplace.
 
 ---
 
-## 📍 Dimana Buyer Bisa Akses Asset yang Dibeli?
+## 📍 Where Can Buyers Access Purchased Assets?
 
-Buyer dapat mengakses asset digital yang sudah dibeli melalui **3 cara**:
+Buyers can access purchased digital assets through **3 methods**:
 
-### 1. 🛒 Tab "Purchased Assets" (Recommended)
+### 1. 🛒 "Purchased Assets" Tab (Recommended)
 
-Lokasi utama untuk mengakses semua asset yang sudah dibeli.
+Primary location to access all purchased assets.
 
-**Cara Akses:**
+**How to Access:**
 ```
-1. Buka aplikasi Filora (http://localhost:3004)
+1. Open Filora application (http://localhost:3004)
 2. Connect wallet
-3. Klik tab "Purchased Assets" atau "My Purchases"
-4. Lihat semua asset yang sudah dibeli
-5. Klik tombol "Download Asset" untuk download
+3. Click "Purchased Assets" or "My Purchases" tab
+4. View all purchased assets
+5. Click "Download Asset" button to download
 ```
 
-**Fitur yang Tersedia:**
-- ✅ List semua asset yang sudah dibeli
-- ✅ Download button untuk setiap asset
+**Available Features:**
+- ✅ List all purchased assets
+- ✅ Download button for each asset
 - ✅ View NFT License
 - ✅ Verify License on-chain
 - ✅ Asset details (CID, price, purchase date)
 - ✅ Pagination (6 items per page)
 
-### 2. 📄 Halaman Detail Asset
+### 2. 📄 Asset Detail Page
 
-Buyer juga bisa akses dari halaman detail asset.
+Buyers can also access from the asset detail page.
 
-**Cara Akses:**
+**How to Access:**
 ```
-1. Buka marketplace
-2. Klik asset yang sudah dibeli
-3. Jika sudah dibeli, akan muncul badge "✅ Owned"
-4. Button "Download" akan tersedia
-5. Klik download untuk mengunduh file
+1. Open marketplace
+2. Click purchased asset
+3. If already purchased, "✅ Owned" badge will appear
+4. "Download" button will be available
+5. Click download to download file
 ```
 
-### 3. 📁 Tab "My Assets"
+### 3. 📁 "My Assets" Tab
 
-Semua asset yang di-upload dan dibeli juga bisa diakses di sini.
+All uploaded and purchased assets can also be accessed here.
 
-**Cara Akses:**
+**How to Access:**
 ```
-1. Klik tab "My Assets"
-2. Lihat list dataset
-3. Expand dataset untuk lihat pieces
-4. Klik download pada piece yang dimiliki
+1. Click "My Assets" tab
+2. View dataset list
+3. Expand dataset to see pieces
+4. Click download on owned piece
 ```
 
 ---
 
-## 🔄 Alur Pembelian hingga Akses
+## 🔄 Purchase to Access Flow
 
 ### Step-by-Step Process:
 
 ```mermaid
 graph TD
-    A[Buyer Browse Marketplace] --> B[Klik Asset]
-    B --> C[Klik 'Buy' Button]
+    A[Buyer Browse Marketplace] --> B[Click Asset]
+    B --> C[Click 'Buy' Button]
     C --> D[Approve USDFC Spending]
     D --> E[Confirm Purchase Transaction]
     E --> F[Payment Processed]
     F --> G[Royalty Distribution to Creator]
     G --> H[NFT License Auto-Minted]
     H --> I[Purchase Recorded to LocalStorage]
-    I --> J[Asset Tersedia di 'Purchased Assets']
+    I --> J[Asset Available in 'Purchased Assets']
     J --> K[Buyer Download via Button]
-    K --> L[File Downloaded dari Filbeam CDN]
+    K --> L[File Downloaded from Filbeam CDN]
 ```
 
-### Detail Setiap Step:
+### Details for Each Step:
 
-#### 1️⃣ **Pembelian Asset**
+#### 1️⃣ **Asset Purchase**
 ```typescript
-// User klik "Buy" button
-→ Modal pembelian terbuka
+// User clicks "Buy" button
+→ Purchase modal opens
 → Review price & royalty breakdown
 → Approve USDFC token spending
 → Confirm purchase transaction
-→ Smart contract FilecoinPay process payment
+→ Smart contract FilecoinPay processes payment
 ```
 
 #### 2️⃣ **Automatic NFT Minting**
 ```typescript
-// Setelah payment sukses
-→ Hook usePurchasedAssets otomatis trigger
+// After payment succeeds
+→ Hook usePurchasedAssets automatically triggers
 → Mint NFT license via FiloraLicense1155 contract
-→ NFT dikirim ke wallet buyer
-→ License hash & token ID disimpan
+→ NFT sent to buyer wallet
+→ License hash & token ID saved
 ```
 
 #### 3️⃣ **Recording Purchase**
 ```typescript
-// Purchase disimpan di localStorage
+// Purchase saved to localStorage
 {
   datasetId: number,
   pieceId: number,
@@ -115,7 +115,7 @@ graph TD
 
 #### 4️⃣ **Access Control**
 ```typescript
-// useAssetAccess hook check ownership
+// useAssetAccess hook checks ownership
 hasAccess(datasetId, pieceId) {
   return purchases.includes(asset);
 }
@@ -123,7 +123,7 @@ hasAccess(datasetId, pieceId) {
 
 #### 5️⃣ **Download Process**
 ```typescript
-// Buyer klik download
+// Buyer clicks download
 → Check hasAccess()
 → Generate access token (valid 24 hours)
 → Try download from Filbeam CDN (fast)
@@ -133,7 +133,7 @@ hasAccess(datasetId, pieceId) {
 
 ---
 
-## 💾 Teknologi Download
+## 💾 Download Technology
 
 ### Method 1: Filbeam CDN (Primary)
 - **URL Pattern:** `https://gateway.filbeam.com/piece/{CID}`
@@ -145,9 +145,9 @@ hasAccess(datasetId, pieceId) {
 - **Method:** `synapse.storage.download(commp)`
 - **Speed:** Medium (5-10 seconds)
 - **Reliability:** Very High
-- **Use Case:** Backup jika CDN gagal
+- **Use Case:** Backup if CDN fails
 
-### Implementasi:
+### Implementation:
 ```typescript
 // hooks/useDownloadPiece.ts
 const downloadPiece = async (commp: string) => {
@@ -177,7 +177,7 @@ const downloadPiece = async (commp: string) => {
 
 ### 1. **Ownership Verification**
 ```typescript
-// Check jika buyer memiliki asset
+// Check if buyer owns asset
 const hasAccess = (datasetId, pieceId) => {
   const purchase = purchases.find(
     p => p.datasetId === datasetId && p.pieceId === pieceId
@@ -211,7 +211,7 @@ const token = btoa(JSON.stringify(accessToken));
 
 ---
 
-## 📱 UI Components untuk Buyer Access
+## 📱 UI Components for Buyer Access
 
 ### 1. **PurchasedAssets Component**
 ```typescript
@@ -275,10 +275,10 @@ const token = btoa(JSON.stringify(accessToken));
 ```
 
 ### Benefits:
-- ✅ **Offline Access:** Data tersimpan lokal
-- ✅ **Fast Loading:** Tidak perlu query blockchain
-- ✅ **Persistent:** Tetap ada setelah refresh
-- ✅ **Per-Wallet:** Setiap wallet punya data sendiri
+- ✅ **Offline Access:** Data stored locally
+- ✅ **Fast Loading:** No need to query blockchain
+- ✅ **Persistent:** Remains after refresh
+- ✅ **Per-Wallet:** Each wallet has its own data
 
 ---
 
@@ -293,18 +293,18 @@ const token = btoa(JSON.stringify(accessToken));
 5. Transaction confirmed ✅
 6. NFT license auto-minted 🎫
 7. Go to "Purchased Assets" tab
-8. See asset dengan badge "✅ Owned"
+8. See asset with "✅ Owned" badge
 9. Click "Download" → File downloaded 📥
-10. Asset ready untuk digunakan!
+10. Asset ready to use!
 ```
 
 ### Scenario 2: Returning Buyer
 ```
 1. Connect wallet (0x123...)
-2. Data purchase auto-loaded dari localStorage
+2. Purchase data auto-loaded from localStorage
 3. Go to "Purchased Assets" tab
-4. See list semua asset yang pernah dibeli
-5. Click download pada asset manapun
+4. See list of all previously purchased assets
+5. Click download on any asset
 6. File downloaded instantly
 ```
 
@@ -315,17 +315,17 @@ Device 1 (Desktop):
 
 Device 2 (Laptop):
 - Connect same wallet
-- Purchase belum terlihat di localStorage
+- Purchase not yet visible in localStorage
 
 Solution:
 - Verify license on-chain
-- Re-sync purchases dari blockchain
-- Or: Re-download dengan verify NFT ownership
+- Re-sync purchases from blockchain
+- Or: Re-download with NFT ownership verification
 ```
 
 ---
 
-## 🚀 Implementasi Hooks
+## 🚀 Implementation Hooks
 
 ### 1. **usePurchasedAssets**
 ```typescript
@@ -377,65 +377,65 @@ await verifyLicense(datasetId, pieceId);
 ### 1. **CDN First Strategy**
 - Filbeam CDN response: ~500ms - 2s
 - Synapse fallback: ~5s - 10s
-- Always try CDN first untuk user experience terbaik
+- Always try CDN first for best user experience
 
 ### 2. **Caching**
-- Purchase data di localStorage (instant load)
-- NFT balance cached untuk 5 minutes
-- Asset metadata cached untuk 10 minutes
+- Purchase data in localStorage (instant load)
+- NFT balance cached for 5 minutes
+- Asset metadata cached for 10 minutes
 
 ### 3. **Lazy Loading**
 - Load purchases on tab switch
-- Download on-demand (tidak auto-download)
+- Download on-demand (no auto-download)
 - Image preview lazy loaded
 
 ---
 
 ## 🔧 Troubleshooting
 
-### Issue: "Asset tidak muncul di Purchased Assets"
+### Issue: "Asset not showing in Purchased Assets"
 **Solution:**
 1. Check localStorage: `localStorage.getItem('filora_purchased_assets_' + address)`
-2. Verify NFT di wallet
-3. Re-sync dengan klik "Refresh"
-4. Check transaction di block explorer
+2. Verify NFT in wallet
+3. Re-sync by clicking "Refresh"
+4. Check transaction in block explorer
 
-### Issue: "Download gagal"
+### Issue: "Download failed"
 **Solution:**
 1. Check internet connection
-2. Verify CID benar
+2. Verify CID is correct
 3. Try manual via Filbeam: `https://gateway.filbeam.com/piece/{CID}`
-4. Fallback akan auto-trigger ke Synapse
+4. Fallback will auto-trigger to Synapse
 
 ### Issue: "License verification failed"
 **Solution:**
-1. Pastikan wallet connected
-2. Check NFT di wallet contract
+1. Ensure wallet is connected
+2. Check NFT in wallet contract
 3. Verify on Calibration explorer
-4. Re-mint jika perlu
+4. Re-mint if necessary
 
 ---
 
-## 📝 Checklist untuk Buyer
+## 📝 Checklist for Buyers
 
-Setelah membeli asset, pastikan:
+After purchasing an asset, ensure:
 
-- [ ] Transaction confirmed di wallet
+- [ ] Transaction confirmed in wallet
 - [ ] NFT license minted (check wallet)
-- [ ] Asset muncul di "Purchased Assets" tab
-- [ ] Download button tersedia
-- [ ] File bisa di-download
-- [ ] License badge muncul "✅ Licensed"
-- [ ] Asset tersimpan lokal
+- [ ] Asset appears in "Purchased Assets" tab
+- [ ] Download button is available
+- [ ] File can be downloaded
+- [ ] License badge shows "✅ Licensed"
+- [ ] Asset saved locally
 
 ---
 
 ## 🔗 Related Files
 
 ### Components:
-- `components/marketplace/PurchasedAssets.tsx` - UI untuk purchased assets
-- `components/marketplace/AssetAccessModal.tsx` - Modal akses asset
-- `components/marketplace/PurchaseModal.tsx` - Modal pembelian
+- `components/marketplace/PurchasedAssets.tsx` - UI for purchased assets
+- `components/marketplace/AssetAccessModal.tsx` - Asset access modal
+- `components/marketplace/PurchaseModal.tsx` - Purchase modal
 
 ### Hooks:
 - `hooks/usePurchasedAssets.ts` - Manage purchases
@@ -456,27 +456,27 @@ Setelah membeli asset, pastikan:
 ### Planned Features:
 1. **Cloud Sync** - Sync purchases across devices via IPFS
 2. **Download History** - Track download activity
-3. **Streaming Support** - Stream video/audio tanpa download
-4. **Batch Download** - Download multiple assets sekaligus
+3. **Streaming Support** - Stream video/audio without download
+4. **Batch Download** - Download multiple assets at once
 5. **QR Code Access** - Share access via QR code
 6. **Offline Mode** - Access downloaded files offline
-7. **Auto-Backup** - Auto backup purchases ke IPFS
+7. **Auto-Backup** - Auto backup purchases to IPFS
 
 ---
 
 ## 📞 Support
 
-Jika buyer mengalami masalah akses asset:
+If buyers experience asset access issues:
 
 1. **Check Documentation:**
-   - Baca file ini (BUYER_ACCESS_GUIDE.md)
-   - Review README.md untuk basic usage
+   - Read this file (BUYER_ACCESS_GUIDE.md)
+   - Review README.md for basic usage
 
 2. **Debug Steps:**
    - Open browser console (F12)
-   - Check errors di Network tab
-   - Verify transaction di explorer
-   - Test dengan asset lain
+   - Check errors in Network tab
+   - Verify transaction in explorer
+   - Test with another asset
 
 3. **Contact Support:**
    - Open GitHub issue
@@ -485,7 +485,7 @@ Jika buyer mengalami masalah akses asset:
 
 ---
 
-**Last Updated:** Oktober 2025  
+**Last Updated:** October 2025  
 **Status:** ✅ Fully Operational  
 **Network:** Filecoin Calibration Testnet
 
@@ -493,15 +493,12 @@ Jika buyer mengalami masalah akses asset:
 
 ## 🎉 Summary
 
-Buyer dapat mengakses asset digital yang dibeli dengan mudah melalui:
+Buyers can access purchased digital assets easily through:
 
-1. ✅ **Tab "Purchased Assets"** - Lokasi utama untuk semua purchases
+1. ✅ **"Purchased Assets" Tab** - Main location for all purchases
 2. ✅ **Download Button** - One-click download via Filbeam CDN
 3. ✅ **NFT License** - On-chain proof of ownership
-4. ✅ **Persistent Storage** - Data tersimpan di localStorage
-5. ✅ **Fast Access** - CDN delivery dalam 1-2 detik
+4. ✅ **Persistent Storage** - Data stored in localStorage
+5. ✅ **Fast Access** - CDN delivery in 1-2 seconds
 
-**Sistem sudah production-ready dan siap digunakan!** 🚀
-
-
-
+**System is production-ready and ready to use!** 🚀
