@@ -25,13 +25,44 @@ export default function AssetDetailPage() {
   
   const datasetId = parseInt(params.datasetId as string);
   const pieceId = parseInt(params.pieceId as string);
-  const { data: allData } = useAllDatasets();
+  const { data: allData, isLoading } = useAllDatasets();
   const { creator, percentage } = useRoyaltyInfo(datasetId);
   const { price } = useAssetPrice(datasetId);
   const { creator: contractCreator } = useAssetCreator(datasetId);
   
   const assetData = allData?.datasets?.find(ds => ds.pdpVerifierDataSetId === datasetId);
   const pieceData = assetData?.data?.pieces?.find(p => p.pieceId === pieceId);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+          <p className="text-gray-600">Loading asset details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!assetData || !pieceData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="text-center py-20 bg-white rounded-2xl shadow-lg">
+            <div className="text-6xl mb-4">❌</div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">Asset Not Found</h3>
+            <p className="text-gray-600 mb-4">Dataset ID: {datasetId}, Piece ID: {pieceId}</p>
+            <button
+              onClick={() => router.push("/?tab=marketplace")}
+              className="px-6 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
+            >
+              Back to Marketplace
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   // Use price from registry if available, otherwise from contract
   const registryPrice = assetData?.price ? (assetData.price / 1e18).toFixed(2) : null;

@@ -12,6 +12,7 @@ import { AllowanceItemProps, PaymentActionProps, SectionProps } from "@/types";
  * Component to display and manage token payments for storage
  */
 import { useState } from "react";
+import { DepositModal } from "./DepositModal";
 
 export const StorageManager = () => {
   const { isConnected, address } = useAccount();
@@ -35,6 +36,12 @@ export const StorageManager = () => {
     localStorage.getItem(`bio_${address}`) || ""
   );
   const [isEditing, setIsEditing] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+
+  // Check if user has never used warm storage
+  const hasNoWarmStorage = balances?.warmStorageBalance === 0n && 
+                          balances?.currentRateAllowanceGB === 0 && 
+                          balances?.currentLockupAllowance === 0n;
 
   const handleRefetchBalances = async () => {
     await refetchBalances();
@@ -148,6 +155,26 @@ export const StorageManager = () => {
         </div>
       </div>
 
+      {/* First Time Setup Card */}
+      {hasNoWarmStorage && (
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 text-white shadow-xl mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold mb-2">🚀 Setup Required</h3>
+              <p className="text-orange-100 text-sm">
+                You haven't setup warm storage yet. Deposit USDFC to get started.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowDepositModal(true)}
+              className="px-6 py-3 bg-white text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-all"
+            >
+              Setup Now
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Storage Balance Card */}
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
         <StorageBalanceHeader />
@@ -186,6 +213,11 @@ export const StorageManager = () => {
           )}
         </div>
       </div>
+
+      <DepositModal 
+        isOpen={showDepositModal} 
+        onClose={() => setShowDepositModal(false)} 
+      />
     </div>
   );
 };

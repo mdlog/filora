@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useConfetti } from "@/hooks/useConfetti";
-import { useAccount } from "wagmi";
+import { useAccount, useWaitForTransactionReceipt } from "wagmi";
 import { preflightCheck } from "@/utils/preflightCheck";
 import { useSynapse } from "@/providers/SynapseProvider";
 import { Synapse } from "@filoz/synapse-sdk";
@@ -25,6 +25,12 @@ export const useFileUpload = () => {
   const { triggerConfetti } = useConfetti();
   const { address } = useAccount();
   const { registerAsset } = useAssetRegistry();
+  const [registryTxHash, setRegistryTxHash] = useState<`0x${string}` | undefined>();
+  
+  const { isSuccess: isRegistryConfirmed } = useWaitForTransactionReceipt({
+    hash: registryTxHash,
+  });
+
   const mutation = useMutation({
     mutationKey: ["file-upload", address],
     mutationFn: async ({ file, price }: { file: File; price?: string }) => {
@@ -141,29 +147,30 @@ export const useFileUpload = () => {
       }));
 
       // Register asset in registry contract
-      try {
-        setStatus("📝 Registering asset in marketplace...");
-        const datasets = await synapse.storage.findDataSets(address);
-        if (datasets.length > 0) {
-          const dataset = datasets[0];
-          const priceValue = price ? Number(price) : 0;
-          await registerAsset(
-            dataset.pdpVerifierDataSetId,
-            dataset.providerId,
-            pieceCid.toV1().toString(),
-            priceValue
-          );
-          setStatus("✅ Asset registered in marketplace!");
-        }
-      } catch (error) {
-        console.warn("Failed to register asset:", error);
-        // Don't fail the upload if registry fails
+      setStatus("📝 Registering asset in marketplace...");
+      const userDatasets = await synapse.storage.findDataSets(address);
+      if (userDatasets.length > 0) {
+        const dataset = userDatasets[0];
+        const priceValue = price ? Number(price) : 0;
+        const txHash = await registerAsset(
+          dataset.pdpVerifierDataSetId,
+          dataset.providerId,
+          pieceCid.toV1().toString(),
+          priceValue
+        );
+        setStatus("⏳ Waiting for registry transaction confirmation...");
+        return { txHash, pieceCid: pieceCid.toV1().toString() };
       }
+      return { pieceCid: pieceCid.toV1().toString() };
     },
-    onSuccess: () => {
-      setStatus("🎉 File successfully stored on Filecoin!");
-      setProgress(100);
-      triggerConfetti();
+    onSuccess: (data) => {
+      if (data?.txHash) {
+        setRegistryTxHash(data.txHash as `0x${string}`);
+      } else {
+        setStatus("🎉 File successfully stored on Filecoin!");
+        setProgress(100);
+        triggerConfetti();
+      }
     },
     onError: (error) => {
       console.error("Upload failed:", error);
@@ -176,7 +183,16 @@ export const useFileUpload = () => {
     setProgress(0);
     setUploadedInfo(null);
     setStatus("");
+    setRegistryTxHash(undefined);
   };
+
+  // Trigger success when registry tx is confirmed
+  if (isRegistryConfirmed && registryTxHash) {
+    setStatus("🎉 File successfully stored on Filecoin!");
+    setProgress(100);
+    triggerConfetti();
+    setRegistryTxHash(undefined);
+  }
 
   return {
     uploadFileMutation: mutation,
