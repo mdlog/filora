@@ -1,37 +1,36 @@
 # Smart Contract Integration Guide
 
-## ⚠️ Deployment Status
+## ✅ Deployment Status
 
-**IMPORTANT:** Smart contracts are **NOT YET DEPLOYED** to Filecoin Calibration testnet.
+**IMPORTANT:** Smart contracts are **SUCCESSFULLY DEPLOYED** to Filecoin Calibration testnet.
 
-The following contracts need to be deployed before full marketplace functionality:
-- ❌ FiloraLicense1155 (ERC-1155 NFT)
-- ❌ FilecoinPay (Payment Processing)
-- ❌ LicenseVerifier (License Management)
-- ✅ USDFC Token (Already deployed at `0x7a7d1C8C92A4B8d8C8e8F8a8B8C8D8E8F8A8B8C8`)
+All contracts are live and operational:
+- ✅ FiloraLicense1155 (ERC-1155 NFT) - `0x0a609046e6cd45C5408f3e283003B4bcB9050C6F`
+- ✅ FilecoinPay (Payment Processing) - `0xa4118fB7de0666ca38b4e2630204D0a49e486037`
+- ✅ LicenseVerifier (License Management) - `0x25f2133C8A11abB2B9CB72184f88CDF31b353E85`
+- ✅ AssetRegistry (Marketplace Registry) - `0x935f69f2A66FaF91004434aFc89f7180161db32d`
+- ✅ USDFC Token - `0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0`
 
 ## Current Functionality
 
-**Working Features (No Smart Contracts Required):**
+**All Features Are Now Active:**
 - ✅ Browse marketplace assets
 - ✅ Upload files to Filecoin via Synapse SDK
-- ✅ View asset details
+- ✅ View asset details with pricing
 - ✅ Preview via Filbeam CDN
 - ✅ Download assets
 - ✅ Storage management
 - ✅ USDFC balance checking
-
-**Features Requiring Contract Deployment:**
-- ❌ NFT minting
-- ❌ Asset purchasing with royalties
-- ❌ License verification
-- ❌ Royalty withdrawal
+- ✅ NFT minting for digital assets
+- ✅ Asset purchasing with royalties
+- ✅ License verification
+- ✅ Royalty withdrawal
 
 ## Contracts
 
 ### 1. FiloraLicense1155 (ERC-1155 NFT)
-**Status:** ❌ NOT DEPLOYED  
-**Address:** Deploy contract and update `contracts/addresses.ts`
+**Status:** ✅ DEPLOYED  
+**Address:** `0x0a609046e6cd45C5408f3e283003B4bcB9050C6F`
 
 **Features:**
 - Mint NFT licenses for digital assets
@@ -48,8 +47,8 @@ await mintNFT({ tokenId: 1, amount: 1 });
 ```
 
 ### 2. FilecoinPay (Payment Processing)
-**Status:** ❌ NOT DEPLOYED  
-**Address:** Deploy contract and update `contracts/addresses.ts`
+**Status:** ✅ DEPLOYED  
+**Address:** `0xa4118fB7de0666ca38b4e2630204D0a49e486037`
 
 **Features:**
 - Process USDFC payments
@@ -70,8 +69,8 @@ await processPayment.mutateAsync({
 ```
 
 ### 3. LicenseVerifier (License Management)
-**Status:** ❌ NOT DEPLOYED  
-**Address:** Deploy contract and update `contracts/addresses.ts`
+**Status:** ✅ DEPLOYED  
+**Address:** `0x25f2133C8A11abB2B9CB72184f88CDF31b353E85`
 
 **Features:**
 - Verify license ownership
@@ -109,10 +108,11 @@ npx hardhat run scripts/deploy-verifier.ts --network calibration
 After deployment, update contract addresses in `contracts/addresses.ts`:
 ```typescript
 export const CONTRACT_ADDRESSES = {
-  FiloraLicense1155: "0xYOUR_DEPLOYED_ADDRESS", // Replace with actual address
-  FilecoinPay: "0xYOUR_DEPLOYED_ADDRESS", // Replace with actual address
-  LicenseVerifier: "0xYOUR_DEPLOYED_ADDRESS", // Replace with actual address
-  USDFC: "0x7a7d1C8C92A4B8d8C8e8F8a8B8C8D8E8F8A8B8C8", // Already deployed
+  FiloraLicense1155: "0x0a609046e6cd45C5408f3e283003B4bcB9050C6F",
+  FilecoinPay: "0xa4118fB7de0666ca38b4e2630204D0a49e486037",
+  LicenseVerifier: "0x25f2133C8A11abB2B9CB72184f88CDF31b353E85",
+  AssetRegistry: "0x935f69f2A66FaF91004434aFc89f7180161db32d",
+  USDFC: "0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0",
 };
 ```
 

@@ -9,12 +9,13 @@ import { useBalances } from "@/hooks/useBalances";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MarketplaceGrid } from "@/components/marketplace/MarketplaceGrid";
 import { UploadAsset } from "@/components/marketplace/UploadAsset";
-import { MyAssets } from "@/components/marketplace/MyAssets";
-import { StorageManager } from "@/components/StorageManager";
+import { MyAssetsGrid } from "@/components/marketplace/MyAssetsGrid";
+import { Dashboard } from "@/components/Dashboard";
 import { Hero } from "@/components/Hero";
 import { RoyaltyManager } from "@/components/marketplace/RoyaltyManager";
+import { PurchasedAssets } from "@/components/marketplace/PurchasedAssets";
 
-type Tab = "marketplace" | "upload" | "my-assets" | "dashboard" | "royalties";
+type Tab = "marketplace" | "upload" | "my-assets" | "purchased" | "royalties" | "dashboard";
 
 export default function Home() {
   const { isConnected, chainId } = useAccount();
@@ -25,7 +26,7 @@ export default function Home() {
   const { data: balances, isLoading: isLoadingBalances } = useBalances();
 
   const isTab = (value: string | null): value is Tab =>
-    value === "marketplace" || value === "upload" || value === "my-assets" || value === "dashboard" || value === "royalties";
+    value === "marketplace" || value === "upload" || value === "my-assets" || value === "purchased" || value === "royalties" || value === "dashboard";
 
   const updateUrl = (tab: Tab) => {
     const params = new URLSearchParams(searchParams?.toString());
@@ -184,6 +185,12 @@ export default function Home() {
                 label="My Assets"
               />
               <TabButton
+                active={activeTab === "purchased"}
+                onClick={() => handleTabChange("purchased")}
+                icon="🛒"
+                label="Purchased"
+              />
+              <TabButton
                 active={activeTab === "royalties"}
                 onClick={() => handleTabChange("royalties")}
                 icon="💰"
@@ -229,7 +236,18 @@ export default function Home() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <MyAssets />
+                  <MyAssetsGrid />
+                </motion.div>
+              )}
+              {activeTab === "purchased" && (
+                <motion.div
+                  key="purchased"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <PurchasedAssets />
                 </motion.div>
               )}
               {activeTab === "dashboard" && (
@@ -240,7 +258,7 @@ export default function Home() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <StorageManager />
+                  <Dashboard />
                 </motion.div>
               )}
               {activeTab === "royalties" && (
@@ -277,11 +295,10 @@ const TabButton = ({
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
     onClick={onClick}
-    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
-      active
-        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-    }`}
+    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${active
+      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+      }`}
   >
     <span className="text-xl">{icon}</span>
     <span>{label}</span>

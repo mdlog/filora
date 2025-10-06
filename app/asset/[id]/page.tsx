@@ -19,16 +19,16 @@ export default function AssetDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [showMintModal, setShowMintModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  
+
   const assetId = params.id as string;
   const [datasetId, pieceId] = assetId.split('-').map(Number);
   const { data: allData } = useAllDatasets();
   const { creator, percentage } = useRoyaltyInfo(datasetId);
-  
+
   // Find the specific asset from marketplace data
   const assetData = allData?.datasets?.find(ds => ds.pdpVerifierDataSetId === datasetId);
   const pieceData = assetData?.data?.pieces?.find(p => p.pieceId === pieceId);
-  
+
   const asset = {
     id: assetId,
     name: `Digital Asset #${pieceId}`,
@@ -72,9 +72,8 @@ export default function AssetDetailPage() {
             </div>
             <div className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  asset.status === "Live" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${asset.status === "Live" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
+                  }`}>
                   {asset.status === "Live" ? "✅ Live" : "⏸️ Inactive"}
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
@@ -115,7 +114,7 @@ export default function AssetDetailPage() {
                 <LicenseVerificationBadge tokenId={assetId} />
               </div>
               <p className="text-gray-600 mb-6 leading-relaxed">{asset.description}</p>
-              
+
               {creator && percentage && (
                 <div className="bg-purple-50 rounded-xl p-4 mb-6">
                   <div className="flex items-center gap-2 mb-2">
@@ -191,22 +190,20 @@ export default function AssetDetailPage() {
                   <button
                     onClick={() => setShowPurchaseModal(true)}
                     disabled={!canAfford || !address}
-                    className={`py-4 rounded-xl font-bold text-lg transition-all ${
-                      !canAfford || !address
+                    className={`py-4 rounded-xl font-bold text-lg transition-all ${!canAfford || !address
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
-                    }`}
+                      }`}
                   >
                     {!address ? "Connect Wallet" : !canAfford ? "Insufficient Balance" : `💳 Buy ${totalPrice} USDFC`}
                   </button>
                   <button
                     onClick={() => setShowMintModal(true)}
                     disabled={!address}
-                    className={`py-4 rounded-xl font-bold text-lg transition-all ${
-                      !address
+                    className={`py-4 rounded-xl font-bold text-lg transition-all ${!address
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
-                    }`}
+                      }`}
                   >
                     🪙 Mint NFT
                   </button>
@@ -220,7 +217,7 @@ export default function AssetDetailPage() {
                 {asset.description}
               </p>
               <p className="text-gray-600 leading-relaxed mb-6">
-                This digital asset is permanently stored on the Filecoin blockchain, ensuring its authenticity and ownership. 
+                This digital asset is permanently stored on the Filecoin blockchain, ensuring its authenticity and ownership.
                 Each piece is unique and comes with verifiable proof of ownership through blockchain technology.
               </p>
               <h3 className="text-xl font-bold mb-4 mt-6">Asset Information</h3>
@@ -251,18 +248,20 @@ export default function AssetDetailPage() {
           </motion.div>
         </div>
       </div>
-      
+
       <NFTMintModal
         isOpen={showMintModal}
         onClose={() => setShowMintModal(false)}
         assetId={assetId}
         assetName={asset.name}
       />
-      
+
       <PurchaseModal
         isOpen={showPurchaseModal}
         onClose={() => setShowPurchaseModal(false)}
-        assetId={assetId}
+        assetId={datasetId}
+        pieceId={pieceId}
+        pieceCid={pieceData?.pieceCid?.toString() || ""}
         assetName={asset.name}
         seller={asset.owner}
         price={totalPrice.toString()}

@@ -22,14 +22,14 @@ export default function AssetDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [showMintModal, setShowMintModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  
+
   const datasetId = parseInt(params.datasetId as string);
   const pieceId = parseInt(params.pieceId as string);
   const { data: allData, isLoading } = useAllDatasets();
   const { creator, percentage } = useRoyaltyInfo(datasetId);
   const { price } = useAssetPrice(datasetId);
   const { creator: contractCreator } = useAssetCreator(datasetId);
-  
+
   const assetData = allData?.datasets?.find(ds => ds.pdpVerifierDataSetId === datasetId);
   const pieceData = assetData?.data?.pieces?.find(p => p.pieceId === pieceId);
 
@@ -63,11 +63,11 @@ export default function AssetDetailPage() {
       </div>
     );
   }
-  
+
   // Use price from registry if available, otherwise from contract
   const registryPrice = assetData?.price ? (assetData.price / 1e18).toFixed(2) : null;
   const displayPrice = registryPrice || price;
-  
+
   const asset = {
     id: `${datasetId}-${pieceId}`,
     name: `Digital Asset #${pieceId}`,
@@ -119,9 +119,8 @@ export default function AssetDetailPage() {
             </div>
             <div className="p-6">
               <div className="flex items-center gap-2 mb-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  asset.status === "Live" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${asset.status === "Live" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
+                  }`}>
                   {asset.status === "Live" ? "✅ Live" : "⏸️ Inactive"}
                 </span>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
@@ -168,7 +167,7 @@ export default function AssetDetailPage() {
                 <LicenseVerificationBadge tokenId={datasetId} />
               </div>
               <p className="text-gray-600 mb-6 leading-relaxed">{asset.description}</p>
-              
+
               {creator && percentage && (
                 <div className="bg-purple-50 rounded-xl p-4 mb-6">
                   <div className="flex items-center gap-2 mb-2">
@@ -194,11 +193,10 @@ export default function AssetDetailPage() {
                   <button
                     onClick={() => setShowPurchaseModal(true)}
                     disabled={!address}
-                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                      !address
+                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!address
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
-                    }`}
+                      }`}
                   >
                     {!address ? "Connect Wallet" : `💳 Buy for ${parseFloat(displayPrice).toFixed(2)} USDFC`}
                   </button>
@@ -206,11 +204,10 @@ export default function AssetDetailPage() {
                 <button
                   onClick={() => setShowMintModal(true)}
                   disabled={!address}
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                    !address
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!address
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
-                  }`}
+                    }`}
                 >
                   {!address ? "Connect Wallet" : "🪙 Mint NFT License"}
                 </button>
@@ -228,7 +225,7 @@ export default function AssetDetailPage() {
             <p className="text-gray-600 leading-relaxed mb-4">
               {asset.description}
             </p>
-            
+
             <h3 className="text-xl font-bold mb-4 mt-6">📊 Technical Details</h3>
             <div className="bg-gray-50 rounded-xl p-4 space-y-3 text-sm mb-6">
               <div className="flex justify-between border-b border-gray-200 pb-2">
@@ -249,16 +246,15 @@ export default function AssetDetailPage() {
               </div>
               <div className="flex justify-between border-b border-gray-200 pb-2">
                 <span className="text-gray-600 font-medium">Status:</span>
-                <span className={`font-semibold ${
-                  asset.status === "Live" ? "text-green-600" : "text-gray-600"
-                }`}>{asset.status}</span>
+                <span className={`font-semibold ${asset.status === "Live" ? "text-green-600" : "text-gray-600"
+                  }`}>{asset.status}</span>
               </div>
               {pieceData?.pieceCid && asset.owner && (
                 <div className="pt-2">
                   <span className="text-gray-600 font-medium block mb-2">🌐 CDN Access:</span>
-                  <a 
+                  <a
                     href={`https://${asset.owner}.calibration.filcdn.io/${pieceData.pieceCid.toString()}`}
-                    target="_blank" 
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-indigo-600 hover:text-indigo-700 text-xs break-all underline"
                   >
@@ -302,7 +298,7 @@ export default function AssetDetailPage() {
           </motion.div>
         </div>
       </div>
-      
+
       <NFTMintModal
         isOpen={showMintModal}
         onClose={() => setShowMintModal(false)}
@@ -311,12 +307,14 @@ export default function AssetDetailPage() {
         pieceCid={pieceData?.pieceCid?.toString()}
         ownerAddress={contractCreator || asset.owner}
       />
-      
+
       {displayPrice && parseFloat(displayPrice) > 0 && (
         <PurchaseModal
           isOpen={showPurchaseModal}
           onClose={() => setShowPurchaseModal(false)}
           assetId={datasetId}
+          pieceId={pieceId}
+          pieceCid={pieceData?.pieceCid?.toString() || ""}
           assetName={asset.name}
           seller={asset.owner}
           price={displayPrice}

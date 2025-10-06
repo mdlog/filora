@@ -27,11 +27,13 @@ Filora is a decentralized marketplace for buying, selling, and trading digital a
 
 ## Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 18+ and npm/yarn
 - A web3 wallet (like MetaMask)
 - Basic understanding of React and TypeScript
 - Get some tFIL tokens on Filecoin Calibration testnet [link to faucet](https://faucet.calibnet.chainsafe-fil.io/funds.html)
 - Get some USDFC tokens on Filecoin Calibration testnet [link to faucet](https://forest-explorer.chainsafe.dev/faucet/calibnet_usdfc)
+
+> **Note:** This project uses Yarn as the package manager for better disk space efficiency and faster installation.
 
 ## Getting Started
 
@@ -42,9 +44,18 @@ cd filora
 ```
 
 ### 2. Install Dependencies
+
+**Option A: Using Yarn (Recommended)**
+```bash
+yarn install
+```
+
+**Option B: Using npm**
 ```bash
 npm install
 ```
+
+> **Tip:** If you have limited disk space, use Yarn as it's more efficient in managing dependencies.
 
 ### 3. Get Testnet Tokens
 - Get tFIL: [Filecoin Calibration Faucet](https://faucet.calibnet.chainsafe-fil.io/funds.html)
@@ -70,11 +81,22 @@ npm run deploy
 See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions.
 
 ### 5. Run Development Server
+
+**Using Yarn:**
+```bash
+yarn dev
+```
+
+**Using npm:**
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+The application will automatically start on an available port:
+- Default: [http://localhost:3000](http://localhost:3000)
+- If port 3000 is busy: [http://localhost:3004](http://localhost:3004) (or next available port)
+
+> **Note:** Check the terminal output for the exact port number your application is running on.
 
 ### 6. Connect Wallet
 - Click "Connect Wallet" button
@@ -112,6 +134,34 @@ Open [http://localhost:3000](http://localhost:3000)
 4. Approve USDFC spending
 5. Confirm purchase transaction
 6. Royalties automatically distributed to creator
+7. NFT license automatically minted to your wallet
+
+### Access Purchased Assets
+
+After buying, access your assets through:
+
+**Option 1: Purchased Tab (Recommended)**
+1. Go to **Purchased** tab (icon 🛒)
+2. View all assets you've bought
+3. Click **Download Asset** button
+4. File downloads via Filbeam CDN (1-2 seconds)
+
+**Option 2: Asset Detail Page**
+1. Click any purchased asset in marketplace
+2. You'll see **✅ Owned** badge
+3. Download button becomes available
+4. Click to download instantly
+
+**Features:**
+- 📥 One-click download via Filbeam CDN
+- 🎫 View NFT license details
+- ✅ Verify ownership on-chain
+- 💾 Assets stored persistently in your account
+- ⚡ Fast access with CDN delivery
+
+See [BUYER_ACCESS_GUIDE.md](./BUYER_ACCESS_GUIDE.md) for detailed access documentation.
+
+> **Troubleshooting Purchases:** If you encounter errors during purchase (e.g., "Internal JSON-RPC error"), see [PURCHASE_TROUBLESHOOTING.md](./PURCHASE_TROUBLESHOOTING.md) for solutions.
 
 ### Mint NFT License
 
@@ -165,9 +215,11 @@ Filora uses Filecoin's PDP system for verifiable, persistent storage:
 - **FilecoinPay** ✅ `0xa4118fB7de0666ca38b4e2630204D0a49e486037` - Payment processing
 - **LicenseVerifier** ✅ `0x25f2133C8A11abB2B9CB72184f88CDF31b353E85` - License verification
 - **AssetRegistry** ✅ `0x935f69f2A66FaF91004434aFc89f7180161db32d` - Marketplace registry with price
-- **USDFC Token** ✅ - Stablecoin for payments
+- **USDFC Token** ✅ `0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0` - Stablecoin for payments
 
 See [SMART_CONTRACTS.md](./SMART_CONTRACTS.md) and [REGISTRY_DEPLOYMENT.md](./REGISTRY_DEPLOYMENT.md) for details.
+
+**Having upload issues?** See [UPLOAD_TROUBLESHOOTING.md](./UPLOAD_TROUBLESHOOTING.md) for solutions.
 
 ### Key Hooks
 
@@ -199,13 +251,16 @@ See [SMART_CONTRACTS.md](./SMART_CONTRACTS.md) and [REGISTRY_DEPLOYMENT.md](./RE
 
 ## Tech Stack
 
-- **Frontend:** Next.js 14, React, TypeScript, TailwindCSS
-- **Blockchain:** Filecoin Calibration Testnet
+- **Frontend:** Next.js 15.3.2, React 19, TypeScript, TailwindCSS 4
+- **Build Tool:** Turbopack (Next.js optimized bundler)
+- **Blockchain:** Filecoin Calibration Testnet (Chain ID: 314159)
 - **Storage:** Synapse SDK for Filecoin storage
-- **Wallet:** RainbowKit + Wagmi
-- **State Management:** TanStack Query
-- **Animations:** Framer Motion
-- **Smart Contracts:** Solidity, ERC-1155
+- **CDN:** Filbeam CDN for fast content delivery
+- **Wallet:** RainbowKit + Wagmi v2
+- **State Management:** TanStack Query v5
+- **Animations:** Framer Motion v11
+- **Smart Contracts:** Solidity, ERC-1155, Hardhat
+- **Package Manager:** Yarn (recommended) / npm
 
 ## Project Structure
 
@@ -252,14 +307,28 @@ filora/
 - Verify file size is reasonable
 
 **Contract errors:**
-- Smart contracts are not yet deployed
-- Deploy contracts first using [SMART_CONTRACTS.md](./SMART_CONTRACTS.md) guide
-- Update contract addresses in `contracts/addresses.ts` after deployment
+- Verify smart contracts are deployed
+- Check contract addresses in `contracts/addresses.ts` are correct
+- Ensure wallet is connected to Calibration network (Chain ID: 314159)
 - NFT and payment features require deployed contracts
+
+**Disk space issues:**
+- If getting "ENOSPC" errors during installation
+- Clean npm cache: `npm cache clean --force`
+- Use Yarn instead: More space-efficient package manager
+- Check available space: `df -h`
 
 ## Development
 
 ### Build for Production
+
+**Using Yarn:**
+```bash
+yarn build
+yarn start
+```
+
+**Using npm:**
 ```bash
 npm run build
 npm start

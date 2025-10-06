@@ -14,13 +14,13 @@ All Filora smart contracts have been successfully deployed to **Filecoin Calibra
 
 ### FiloraLicense1155 (ERC-1155 NFT)
 ```
-Address: 0xA2Ad14ad2e8eDbb3B523763ed7e2bB453D6a906d
+Address: 0x0a609046e6cd45C5408f3e283003B4bcB9050C6F
 Status: ✅ DEPLOYED
 Purpose: Mint NFT licenses for digital assets
 ```
 
 **Explorer:**  
-https://calibration.filfox.info/en/address/0xA2Ad14ad2e8eDbb3B523763ed7e2bB453D6a906d
+https://calibration.filfox.info/en/address/0x0a609046e6cd45C5408f3e283003B4bcB9050C6F
 
 **Features:**
 - Mint NFT licenses to any address
@@ -32,13 +32,13 @@ https://calibration.filfox.info/en/address/0xA2Ad14ad2e8eDbb3B523763ed7e2bB453D6
 
 ### FilecoinPay (Payment Processing)
 ```
-Address: 0x1A9A7c9714B9b15B80f7b9f224b2aa50b51a188C
+Address: 0xa4118fB7de0666ca38b4e2630204D0a49e486037
 Status: ✅ DEPLOYED
 Purpose: Process USDFC payments with automatic royalty distribution
 ```
 
 **Explorer:**  
-https://calibration.filfox.info/en/address/0x1A9A7c9714B9b15B80f7b9f224b2aa50b51a188C
+https://calibration.filfox.info/en/address/0xa4118fB7de0666ca38b4e2630204D0a49e486037
 
 **Features:**
 - Process USDFC payments
@@ -51,13 +51,13 @@ https://calibration.filfox.info/en/address/0x1A9A7c9714B9b15B80f7b9f224b2aa50b51
 
 ### LicenseVerifier (License Management)
 ```
-Address: 0xc3a875586d4F20F9624554954fd6241a3c28d8b0
+Address: 0x25f2133C8A11abB2B9CB72184f88CDF31b353E85
 Status: ✅ DEPLOYED
 Purpose: Verify license ownership and status
 ```
 
 **Explorer:**  
-https://calibration.filfox.info/en/address/0xc3a875586d4F20F9624554954fd6241a3c28d8b0
+https://calibration.filfox.info/en/address/0x25f2133C8A11abB2B9CB72184f88CDF31b353E85
 
 **Features:**
 - Check if user owns license
@@ -67,15 +67,33 @@ https://calibration.filfox.info/en/address/0xc3a875586d4F20F9624554954fd6241a3c2
 
 ---
 
+### AssetRegistry (Marketplace Registry)
+```
+Address: 0x935f69f2A66FaF91004434aFc89f7180161db32d
+Status: ✅ DEPLOYED
+Purpose: On-chain marketplace registry with price storage
+```
+
+**Explorer:**  
+https://calibration.filfox.info/en/address/0x935f69f2A66FaF91004434aFc89f7180161db32d
+
+**Features:**
+- Register assets to marketplace
+- Store asset pricing information
+- Query all marketplace assets
+- Asset metadata management
+
+---
+
 ### USDFC Token (Stablecoin)
 ```
-Address: 0x7A7D1C8C92A4B8D8C8E8F8A8B8C8D8E8F8A8B8C8
+Address: 0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0
 Status: ✅ DEPLOYED (Pre-existing)
 Purpose: Stablecoin for payments
 ```
 
 **Explorer:**  
-https://calibration.filfox.info/en/address/0x7A7D1C8C92A4B8D8C8E8F8A8B8C8D8E8F8A8B8C8
+https://calibration.filfox.info/en/address/0xb3042734b608a1B16e9e86B374A3f3e389B4cDf0
 
 **Get USDFC:**  
 https://forest-explorer.chainsafe.dev/faucet/calibnet_usdfc

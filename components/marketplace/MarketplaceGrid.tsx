@@ -11,7 +11,7 @@ export const MarketplaceGrid = () => {
   const { address } = useAccount();
   const { data, isLoading, error } = useAllDatasets();
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   console.log("Marketplace data:", data);
   console.log("Marketplace loading:", isLoading);
   console.log("Marketplace error:", error);
@@ -20,7 +20,7 @@ export const MarketplaceGrid = () => {
   const [filterStatus, setFilterStatus] = useState<"all" | "live" | "inactive">("all");
   const [filterProvider, setFilterProvider] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "by-owner">("grid");
-  const itemsPerPage = 15;
+  const itemsPerPage = 10; // 10 items per page
 
   // Don't return early - show UI always
 
@@ -29,15 +29,15 @@ export const MarketplaceGrid = () => {
       console.log("Dataset without pieces:", dataset?.pdpVerifierDataSetId);
       return [];
     }
-    
+
     // Get owner address from available sources
-    const owner = dataset.payer || 
-                  dataset.data?.payer || 
-                  dataset.provider?.address || 
-                  dataset.payee;
-    
+    const owner = dataset.payer ||
+      dataset.data?.payer ||
+      dataset.provider?.address ||
+      dataset.payee;
+
     console.log(`Dataset ${dataset.pdpVerifierDataSetId} (${dataset.provider?.name}): owner=${owner}, pieces=${dataset.data.pieces.length}`);
-    
+
     return dataset.data.pieces.map((piece) => ({
       pieceId: piece.pieceId,
       pieceCid: piece.pieceCid.toString(),
@@ -49,7 +49,7 @@ export const MarketplaceGrid = () => {
       price: dataset.price,
     }));
   }) || [];
-  
+
   console.log("All assets:", allAssets.length);
 
   const formatAddress = (address: string) => {
@@ -77,19 +77,19 @@ export const MarketplaceGrid = () => {
     .filter((asset) => {
       if (!asset) return false;
       const search = searchTerm.toLowerCase();
-      const matchSearch = 
+      const matchSearch =
         asset.pieceCid.toLowerCase().includes(search) ||
         asset.pieceId.toString().includes(search) ||
         asset.provider.toLowerCase().includes(search) ||
         (asset.owner && asset.owner.toLowerCase().includes(search));
-      
-      const matchStatus = 
+
+      const matchStatus =
         filterStatus === "all" ? true :
-        filterStatus === "live" ? asset.isLive :
-        !asset.isLive;
-      
+          filterStatus === "live" ? asset.isLive :
+            !asset.isLive;
+
       const matchProvider = filterProvider === "all" || asset.provider === filterProvider;
-      
+
       return matchSearch && matchStatus && matchProvider;
     })
     .sort((a, b) => {
@@ -196,31 +196,28 @@ export const MarketplaceGrid = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => setFilterStatus("all")}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    filterStatus === "all"
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === "all"
                       ? "bg-indigo-600 text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setFilterStatus("live")}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    filterStatus === "live"
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === "live"
                       ? "bg-green-600 text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   Live
                 </button>
                 <button
                   onClick={() => setFilterStatus("inactive")}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    filterStatus === "inactive"
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === "inactive"
                       ? "bg-gray-600 text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   Inactive
                 </button>
@@ -247,36 +244,45 @@ export const MarketplaceGrid = () => {
       {/* View Mode Toggle */}
       {!isLoading && data && allAssets.length > 0 && (
         <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-lg p-4 mb-8 flex items-center justify-between"
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-gray-700">View Mode:</span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-                viewMode === "grid"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              <span>🔲</span> Grid View
-            </button>
-            <button
-              onClick={() => setViewMode("by-owner")}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-                viewMode === "by-owner"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              <span>👥</span> By Owner
-            </button>
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl shadow-lg p-4 mb-8 flex items-center justify-between flex-wrap gap-4"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-gray-700">View Mode:</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${viewMode === "grid"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+              >
+                <span>🔲</span> Grid View
+              </button>
+              <button
+                onClick={() => setViewMode("by-owner")}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${viewMode === "by-owner"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+              >
+                <span>👥</span> By Owner
+              </button>
+            </div>
           </div>
-        </div>
-      </motion.div>
+
+          {/* Pagination Info */}
+          {viewMode === "grid" && filteredAssets.length > 0 && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="font-semibold text-indigo-600">Page {currentPage} of {totalPages}</span>
+              <span className="text-gray-400">•</span>
+              <span>Showing {startIndex + 1}-{Math.min(endIndex, filteredAssets.length)} of {filteredAssets.length} assets</span>
+              <span className="text-gray-400">•</span>
+              <span className="font-semibold text-gray-800">{itemsPerPage} per page</span>
+            </div>
+          )}
+        </motion.div>
       )}
 
       {/* Content Area */}
@@ -370,11 +376,10 @@ export const MarketplaceGrid = () => {
                           <span className="text-2xl">🎨</span>
                         </div>
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            asset.isLive
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${asset.isLive
                               ? "bg-green-100 text-green-700"
                               : "bg-gray-200 text-gray-700"
-                          }`}
+                            }`}
                         >
                           {asset.isLive ? "✅" : "⏸️"}
                         </span>
@@ -441,181 +446,179 @@ export const MarketplaceGrid = () => {
         </motion.div>
       ) : (
         <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {currentAssets.map((asset, index) =>
-            asset ? (
-              <motion.div
-                key={`${asset.providerId}-${asset.datasetId}-${asset.pieceId}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ scale: 1.03, y: -5 }}
-                onClick={() => router.push(`/assets/${asset.datasetId}/${asset.pieceId}`)}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer"
-              >
-                <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 h-48 flex items-center justify-center relative overflow-hidden">
-                  {asset.owner && (
-                    <img
-                      src={`https://${asset.owner}.calibration.filcdn.io/${asset.pieceCid}`}
-                      alt={`Asset ${asset.pieceId}`}
-                      className="w-full h-full object-cover absolute inset-0"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  )}
-                  <span className="text-6xl relative z-10">🎨</span>
-                  {asset.price !== undefined && asset.price > 0 && (
-                    <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg z-20">
-                      <span className="text-sm font-bold text-indigo-600">{(asset.price / 1e18).toFixed(2)} USDFC</span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-bold text-gray-800">Asset #{asset.pieceId}</h3>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        asset.isLive
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {asset.isLive ? "✅ Live" : "⏸️ Inactive"}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 mb-3 truncate">CID: {asset.pieceCid}</p>
-                  <div className="space-y-2 mb-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-gray-400">✍️</span>
-                      <div className="flex-1">
-                        <p className="text-xs text-gray-500">Author</p>
-                        <p className="text-gray-600 font-mono text-xs truncate">{formatAddress(asset.owner)}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-gray-400">🏢</span>
-                      <div className="flex-1">
-                        <p className="text-xs text-gray-500">Provider</p>
-                        <p className="text-gray-600 text-xs truncate">{asset.provider}</p>
-                      </div>
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentAssets.map((asset, index) =>
+              asset ? (
+                <motion.div
+                  key={`${asset.providerId}-${asset.datasetId}-${asset.pieceId}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ scale: 1.03, y: -5 }}
+                  onClick={() => router.push(`/assets/${asset.datasetId}/${asset.pieceId}`)}
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer"
+                >
+                  <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 h-48 flex items-center justify-center relative overflow-hidden">
+                    {asset.owner && (
+                      <img
+                        src={`https://${asset.owner}.calibration.filcdn.io/${asset.pieceCid}`}
+                        alt={`Asset ${asset.pieceId}`}
+                        className="w-full h-full object-cover absolute inset-0"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    )}
+                    <span className="text-6xl relative z-10">🎨</span>
                     {asset.price !== undefined && asset.price > 0 && (
+                      <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg z-20">
+                        <span className="text-sm font-bold text-indigo-600">{(asset.price / 1e18).toFixed(2)} USDFC</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-lg font-bold text-gray-800">Asset #{asset.pieceId}</h3>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${asset.isLive
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-700"
+                          }`}
+                      >
+                        {asset.isLive ? "✅ Live" : "⏸️ Inactive"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-3 truncate">CID: {asset.pieceCid}</p>
+                    <div className="space-y-2 mb-3">
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-400">💰</span>
+                        <span className="text-gray-400">✍️</span>
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500">Price</p>
-                          <p className="text-gray-800 font-bold text-sm">{(asset.price / 1e18).toFixed(2)} USDFC</p>
+                          <p className="text-xs text-gray-500">Author</p>
+                          <p className="text-gray-600 font-mono text-xs truncate">{formatAddress(asset.owner)}</p>
                         </div>
                       </div>
-                    )}
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-400">🏢</span>
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-500">Provider</p>
+                          <p className="text-gray-600 text-xs truncate">{asset.provider}</p>
+                        </div>
+                      </div>
+                      {asset.price !== undefined && asset.price > 0 && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-gray-400">💰</span>
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500">Price</p>
+                            <p className="text-gray-800 font-bold text-sm">{(asset.price / 1e18).toFixed(2)} USDFC</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-xl font-semibold text-center">
+                      View Details
+                    </div>
                   </div>
-                  <div className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2 rounded-xl font-semibold text-center">
-                    View Details
-                  </div>
+                </motion.div>
+              ) : null
+            )}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl shadow-lg p-6 mt-8"
+            >
+              <div className="flex items-center justify-between">
+                {/* Previous Button */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg disabled:hover:shadow-none"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span className="hidden sm:inline">Previous</span>
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center gap-2">
+                  {/* First Page */}
+                  {currentPage > 3 && (
+                    <>
+                      <button
+                        onClick={() => setCurrentPage(1)}
+                        className="w-10 h-10 rounded-xl font-semibold transition-all bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      >
+                        1
+                      </button>
+                      {currentPage > 4 && (
+                        <span className="text-gray-400 px-2">...</span>
+                      )}
+                    </>
+                  )}
+
+                  {/* Page Range */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => {
+                      return page === currentPage ||
+                        page === currentPage - 1 ||
+                        page === currentPage + 1 ||
+                        (page === currentPage - 2 && currentPage <= 3) ||
+                        (page === currentPage + 2 && currentPage >= totalPages - 2);
+                    })
+                    .map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-10 h-10 rounded-xl font-semibold transition-all ${currentPage === page
+                            ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                  {/* Last Page */}
+                  {currentPage < totalPages - 2 && (
+                    <>
+                      {currentPage < totalPages - 3 && (
+                        <span className="text-gray-400 px-2">...</span>
+                      )}
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        className="w-10 h-10 rounded-xl font-semibold transition-all bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      >
+                        {totalPages}
+                      </button>
+                    </>
+                  )}
                 </div>
-              </motion.div>
-            ) : null
-          )}
-        </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-lg p-6 mt-8"
-          >
-            <div className="flex items-center justify-between">
-              {/* Previous Button */}
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg disabled:hover:shadow-none"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span className="hidden sm:inline">Previous</span>
-              </button>
-
-              {/* Page Numbers */}
-              <div className="flex items-center gap-2">
-                {/* First Page */}
-                {currentPage > 3 && (
-                  <>
-                    <button
-                      onClick={() => setCurrentPage(1)}
-                      className="w-10 h-10 rounded-xl font-semibold transition-all bg-gray-100 hover:bg-gray-200 text-gray-700"
-                    >
-                      1
-                    </button>
-                    {currentPage > 4 && (
-                      <span className="text-gray-400 px-2">...</span>
-                    )}
-                  </>
-                )}
-
-                {/* Page Range */}
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(page => {
-                    return page === currentPage ||
-                           page === currentPage - 1 ||
-                           page === currentPage + 1 ||
-                           (page === currentPage - 2 && currentPage <= 3) ||
-                           (page === currentPage + 2 && currentPage >= totalPages - 2);
-                  })
-                  .map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-10 h-10 rounded-xl font-semibold transition-all ${
-                        currentPage === page
-                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-
-                {/* Last Page */}
-                {currentPage < totalPages - 2 && (
-                  <>
-                    {currentPage < totalPages - 3 && (
-                      <span className="text-gray-400 px-2">...</span>
-                    )}
-                    <button
-                      onClick={() => setCurrentPage(totalPages)}
-                      className="w-10 h-10 rounded-xl font-semibold transition-all bg-gray-100 hover:bg-gray-200 text-gray-700"
-                    >
-                      {totalPages}
-                    </button>
-                  </>
-                )}
+                {/* Next Button */}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg disabled:hover:shadow-none"
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </div>
 
-              {/* Next Button */}
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg disabled:hover:shadow-none"
-              >
-                <span className="hidden sm:inline">Next</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Page Info */}
-            <div className="mt-4 text-center text-sm text-gray-600">
-              Showing <span className="font-semibold text-gray-800">{startIndex + 1}</span> to{' '}
-              <span className="font-semibold text-gray-800">{Math.min(endIndex, filteredAssets.length)}</span> of{' '}
-              <span className="font-semibold text-gray-800">{filteredAssets.length}</span> assets
-            </div>
-          </motion.div>
-        )}
+              {/* Page Info */}
+              <div className="mt-4 text-center text-sm text-gray-600">
+                Showing <span className="font-semibold text-gray-800">{startIndex + 1}</span> to{' '}
+                <span className="font-semibold text-gray-800">{Math.min(endIndex, filteredAssets.length)}</span> of{' '}
+                <span className="font-semibold text-gray-800">{filteredAssets.length}</span> assets
+              </div>
+            </motion.div>
+          )}
         </>
       )}
     </div>
