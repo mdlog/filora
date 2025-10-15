@@ -126,18 +126,38 @@ export const useGetActiveAssets = () => {
     functionName: "getActiveAssets",
     query: {
       enabled: !!CONTRACT_ADDRESSES.AssetRegistry,
+      staleTime: 5000, // 5 seconds cache
+      refetchInterval: 10000, // Refresh every 10 seconds
+      refetchOnWindowFocus: true, // Refresh when user returns
     },
   });
 
-  const serializedData = data ? (data as any[]).map((asset: any) => ({
-    owner: asset.owner,
-    datasetId: Number(asset.datasetId),
-    providerId: Number(asset.providerId),
-    pieceCid: asset.pieceCid,
-    price: Number(asset.price),
-    timestamp: Number(asset.timestamp),
-    isActive: asset.isActive,
-  })) : undefined;
+  console.log("🔍 Raw AssetRegistry data:", data);
+  console.log("📊 AssetRegistry loading:", isLoading);
+  console.log("❌ AssetRegistry error:", error);
+
+  const serializedData = data ? (data as any[]).map((asset: any, index: number) => {
+    console.log(`Asset ${index} from contract:`, {
+      owner: asset.owner,
+      datasetId: Number(asset.datasetId),
+      providerId: Number(asset.providerId),
+      pieceCid: asset.pieceCid,
+      price: Number(asset.price),
+      isActive: asset.isActive,
+    });
+
+    return {
+      owner: asset.owner,
+      datasetId: Number(asset.datasetId),
+      providerId: Number(asset.providerId),
+      pieceCid: asset.pieceCid,
+      price: Number(asset.price),
+      timestamp: Number(asset.timestamp),
+      isActive: asset.isActive,
+    };
+  }) : undefined;
+
+  console.log("✅ Total active assets from contract:", serializedData?.length || 0);
 
   return { data: serializedData, isLoading, error, refetch };
 };

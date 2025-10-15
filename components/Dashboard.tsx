@@ -12,13 +12,24 @@ import { useRouter } from "next/navigation";
 import { parseUnits } from "viem";
 
 export const Dashboard = () => {
-    const { address } = useAccount();
-    const { data: balances, isLoading: isLoadingBalances, refetch: refetchBalances } = useBalances();
+    const { address, isConnected } = useAccount();
+    const { data: balances, isLoading: isLoadingBalances, refetch: refetchBalances, error: balancesError } = useBalances();
     const { purchases } = usePurchasedAssets();
     const { data: allData } = useAllDatasets();
     const router = useRouter();
     const { mutation: paymentMutation, status: paymentStatus } = usePayment();
     const { mutateAsync: handlePayment, isPending: isProcessingPayment } = paymentMutation;
+
+    // Debug wallet connection
+    useEffect(() => {
+        console.log("🔍 Dashboard Wallet Status:", {
+            address,
+            isConnected,
+            isLoadingBalances,
+            hasBalances: !!balances,
+            balancesError: balancesError?.message,
+        });
+    }, [address, isConnected, isLoadingBalances, balances, balancesError]);
 
     // Profile state
     const [username, setUsername] = useState<string>("");
@@ -293,7 +304,13 @@ export const Dashboard = () => {
                                 <div>
                                     <p className="text-white/70 text-xs">FIL Balance</p>
                                     <p className="text-white font-bold text-lg">
-                                        {isLoadingBalances ? "..." : balances?.filBalanceFormatted.toFixed(4) || "0.0000"}
+                                        {isLoadingBalances ? (
+                                            <span className="animate-pulse">Loading...</span>
+                                        ) : balancesError ? (
+                                            <span className="text-red-300 text-xs">Error</span>
+                                        ) : (
+                                            balances?.filBalanceFormatted.toFixed(4) || "0.0000"
+                                        )}
                                     </p>
                                 </div>
                             </div>
@@ -305,7 +322,13 @@ export const Dashboard = () => {
                                 <div>
                                     <p className="text-white/70 text-xs">USDFC Balance</p>
                                     <p className="text-white font-bold text-lg">
-                                        {isLoadingBalances ? "..." : balances?.usdfcBalanceFormatted.toFixed(2) || "0.00"}
+                                        {isLoadingBalances ? (
+                                            <span className="animate-pulse">Loading...</span>
+                                        ) : balancesError ? (
+                                            <span className="text-red-300 text-xs">Error</span>
+                                        ) : (
+                                            balances?.usdfcBalanceFormatted.toFixed(2) || "0.00"
+                                        )}
                                     </p>
                                 </div>
                             </div>
@@ -317,7 +340,13 @@ export const Dashboard = () => {
                                 <div>
                                     <p className="text-white/70 text-xs">Storage Balance</p>
                                     <p className="text-white font-bold text-lg">
-                                        {isLoadingBalances ? "..." : balances?.warmStorageBalanceFormatted.toFixed(2) || "0.00"}
+                                        {isLoadingBalances ? (
+                                            <span className="animate-pulse">Loading...</span>
+                                        ) : balancesError ? (
+                                            <span className="text-red-300 text-xs">Error</span>
+                                        ) : (
+                                            balances?.warmStorageBalanceFormatted.toFixed(2) || "0.00"
+                                        )}
                                     </p>
                                 </div>
                             </div>

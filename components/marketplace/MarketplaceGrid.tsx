@@ -9,18 +9,28 @@ import { useAccount } from "wagmi";
 export const MarketplaceGrid = () => {
   const router = useRouter();
   const { address } = useAccount();
-  const { data, isLoading, error } = useAllDatasets();
+  const { data, isLoading, error, refetch } = useAllDatasets();
   const [searchTerm, setSearchTerm] = useState("");
 
   console.log("Marketplace data:", data);
   console.log("Marketplace loading:", isLoading);
   console.log("Marketplace error:", error);
+  
+  // Debug: Show all datasets with their owners
+  if (data?.datasets) {
+    console.log("📊 All datasets in marketplace:", data.datasets.map((d: any) => ({
+      datasetId: d.pdpVerifierDataSetId,
+      provider: d.provider?.name,
+      payer: d.payer,
+      pieces: d.data?.pieces?.length || 0
+    })));
+  }
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "id-asc" | "id-desc">("newest");
   const [filterStatus, setFilterStatus] = useState<"all" | "live" | "inactive">("all");
   const [filterProvider, setFilterProvider] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "by-owner">("grid");
-  const itemsPerPage = 10; // 10 items per page
+  const itemsPerPage = 6; // 6 items per page (2 rows of 3 in grid view)
 
   // Don't return early - show UI always
 
@@ -62,6 +72,23 @@ export const MarketplaceGrid = () => {
   const formatCID = (cid: string) => {
     if (!cid || cid.length < 20) return cid;
     return `${cid.slice(0, 10)}...${cid.slice(-6)}`;
+  };
+
+  const getAssetName = (asset: any) => {
+    // Try to get a descriptive name from various sources
+
+    // 1. Check if asset has a specific name/title
+    if (asset.name && asset.name !== "Unknown") {
+      return asset.name;
+    }
+
+    // 2. Use provider name + dataset ID for uniqueness
+    if (asset.provider && asset.provider !== "Unknown") {
+      return `${asset.provider} #${asset.datasetId}`;
+    }
+
+    // 3. Use dataset ID + piece ID for uniqueness
+    return `Dataset #${asset.datasetId} • Piece #${asset.pieceId}`;
   };
 
   // Group assets by owner
@@ -132,15 +159,23 @@ export const MarketplaceGrid = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-sm text-gray-600">
+            <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+            Auto-refreshing every 15 seconds
+          </div>
           <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            onClick={() => {
+              console.log("🔄 Manual refresh triggered");
+              refetch();
+            }}
+            disabled={isLoading}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Refresh Marketplace
+            {isLoading ? 'Refreshing...' : 'Refresh Now'}
           </button>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -389,7 +424,7 @@ export const MarketplaceGrid = () => {
                           {asset.isLive ? "✅" : "⏸️"}
                         </span>
                       </div>
-                      <h4 className="font-bold text-gray-800 text-sm mb-2">Asset #{asset.pieceId}</h4>
+                      <h4 className="font-bold text-gray-800 text-sm mb-2">{getAssetName(asset)}</h4>
 
                       {/* 2-Column Grid Layout for By Owner View */}
                       <div className="grid grid-cols-2 gap-2 text-xs">
@@ -500,7 +535,7 @@ export const MarketplaceGrid = () => {
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-bold text-gray-800">Asset #{asset.pieceId}</h3>
+                      <h3 className="text-lg font-bold text-gray-800">{getAssetName(asset)}</h3>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${asset.isLive
                           ? "bg-green-100 text-green-700"

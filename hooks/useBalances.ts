@@ -17,6 +17,9 @@ export const useBalances = () => {
     queryKey: ["balances", address],
     queryFn: async (): Promise<UseBalancesResponse> => {
       if (!synapse) throw new Error("Synapse not found");
+      if (!address) throw new Error("Wallet not connected");
+
+      console.log("🔍 Fetching balances for address:", address);
 
       // Fetch raw balances
       const [filRaw, usdfcRaw, paymentsRaw] = await Promise.all([
@@ -25,12 +28,18 @@ export const useBalances = () => {
         synapse.payments.balance(TOKENS.USDFC),
       ]);
 
+      console.log("💰 Raw balances fetched:", {
+        filRaw: filRaw.toString(),
+        usdfcRaw: usdfcRaw.toString(),
+        paymentsRaw: paymentsRaw.toString(),
+      });
+
       const usdfcDecimals = synapse.payments.decimals(TOKENS.USDFC);
 
       // Calculate storage metrics
       const storageMetrics = await calculateStorageMetrics(synapse);
 
-      return {
+      const result = {
         filBalance: filRaw,
         usdfcBalance: usdfcRaw,
         warmStorageBalance: paymentsRaw,
@@ -39,7 +48,14 @@ export const useBalances = () => {
         warmStorageBalanceFormatted: formatBalance(paymentsRaw, usdfcDecimals),
         ...storageMetrics,
       };
+
+      console.log("✅ Balances formatted:", result);
+
+      return result;
     },
+    enabled: !!address && !!synapse, // ✅ Only run query when wallet is connected and synapse is ready
+    refetchInterval: 10000, // Refetch every 10 seconds to keep balances updated
+    staleTime: 5000, // Consider data stale after 5 seconds
   });
 
   return {

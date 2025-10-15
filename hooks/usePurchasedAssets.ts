@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { useNFTMint } from "./useNFTMint";
 
 export interface PurchasedAsset {
   datasetId: number;
@@ -14,6 +13,8 @@ export interface PurchasedAsset {
   txHash?: string;
   nftTokenId?: string;
   licenseHash?: string;
+  filename?: string; // Original filename with extension
+  assetName?: string; // Asset name for display
 }
 
 const STORAGE_KEY = "filora_purchased_assets";
@@ -21,7 +22,6 @@ const STORAGE_KEY = "filora_purchased_assets";
 export const usePurchasedAssets = () => {
   const { address } = useAccount();
   const [purchases, setPurchases] = useState<PurchasedAsset[]>([]);
-  const { mintNFTLicense } = useNFTMint();
 
   useEffect(() => {
     if (!address) return;
@@ -33,23 +33,22 @@ export const usePurchasedAssets = () => {
 
   const addPurchase = async (asset: PurchasedAsset) => {
     if (!address) return;
-    
-    // Mint NFT license after successful purchase
-    try {
-      const nftResult = await mintNFTLicense({
+
+    // Check if already purchased (prevent duplicates)
+    const alreadyPurchased = purchases.some(
+      p => p.datasetId === asset.datasetId && p.pieceId === asset.pieceId
+    );
+
+    if (alreadyPurchased) {
+      console.warn("⚠️ Asset already purchased, skipping duplicate:", {
         datasetId: asset.datasetId,
-        pieceId: asset.pieceId,
-        pieceCid: asset.pieceCid,
-        buyer: address,
-        price: asset.price
+        pieceId: asset.pieceId
       });
-      
-      asset.nftTokenId = nftResult.tokenId;
-      asset.licenseHash = nftResult.licenseHash;
-    } catch (error) {
-      console.warn("NFT minting failed:", error);
+      return;
     }
-    
+
+    console.log("✅ Adding purchase to storage:", asset);
+
     const updated = [...purchases, asset];
     setPurchases(updated);
     localStorage.setItem(`${STORAGE_KEY}_${address}`, JSON.stringify(updated));
@@ -59,5 +58,35 @@ export const usePurchasedAssets = () => {
     return purchases.find(p => p.datasetId === datasetId && p.pieceId === pieceId);
   };
 
-  return { purchases, addPurchase, getPurchase };
+  const removePurchase = (datasetId: number, pieceId: number) => {
+    if (!address) return;
+
+    console.log("🗑️ Removing purchase:", { datasetId, pieceId });
+
+    const updated = purchases.filter(
+      p => !(p.datasetId === datasetId && p.pieceId === pieceId)
+    );
+
+    setPurchases(updated);
+    localStorage.setItem(`${STORAGE_KEY}_${address}`, JSON.stringify(updated));
+
+    console.log("✅ Purchase removed from storage");
+  };
+
+  const clearAllPurchases = () => {
+    if (!address) return;
+
+    console.log("🗑️ Clearing all purchases");
+    setPurchases([]);
+    localStorage.removeItem(`${STORAGE_KEY}_${address}`);
+    console.log("✅ All purchases cleared");
+  };
+
+  return {
+    purchases,
+    addPurchase,
+    getPurchase,
+    removePurchase,
+    clearAllPurchases
+  };
 };

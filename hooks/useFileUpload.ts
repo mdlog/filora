@@ -16,6 +16,36 @@ export type UploadedInfo = {
   existingPieceCid?: string;
 };
 
+// Store filename metadata locally (indexed by pieceCid)
+const FILENAME_METADATA_KEY = "filora_file_metadata";
+
+export const saveFileMetadata = (pieceCid: string, fileName: string) => {
+  try {
+    const stored = localStorage.getItem(FILENAME_METADATA_KEY);
+    const metadata = stored ? JSON.parse(stored) : {};
+    metadata[pieceCid] = {
+      fileName,
+      uploadedAt: Date.now(),
+    };
+    localStorage.setItem(FILENAME_METADATA_KEY, JSON.stringify(metadata));
+    console.log("📝 Saved file metadata:", { pieceCid, fileName });
+  } catch (error) {
+    console.warn("Failed to save file metadata:", error);
+  }
+};
+
+export const getFileMetadata = (pieceCid: string): string | null => {
+  try {
+    const stored = localStorage.getItem(FILENAME_METADATA_KEY);
+    if (!stored) return null;
+    const metadata = JSON.parse(stored);
+    return metadata[pieceCid]?.fileName || null;
+  } catch (error) {
+    console.warn("Failed to get file metadata:", error);
+    return null;
+  }
+};
+
 /**
  * Hook to upload a file to the Filecoin network using Synapse.
  */
@@ -150,12 +180,16 @@ export const useFileUpload = () => {
       });
 
       setProgress(95);
+      const pieceCidString = pieceCid.toV1().toString();
       setUploadedInfo((prev) => ({
         ...prev,
         fileName: file.name,
         fileSize: file.size,
-        pieceCid: pieceCid.toV1().toString(),
+        pieceCid: pieceCidString,
       }));
+
+      // ✅ Save filename metadata for future download
+      saveFileMetadata(pieceCidString, file.name);
 
       // Register asset in registry contract
       setStatus("📝 Checking marketplace registry...");

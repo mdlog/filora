@@ -10,6 +10,7 @@ import { LicenseVerificationBadge } from "@/components/marketplace/LicenseVerifi
 import { useRoyaltyInfo } from "@/hooks/useRoyaltyInfo";
 import { useQuery } from "@tanstack/react-query";
 import { useAllDatasets } from "@/hooks/useAllDatasets";
+import { usePurchasedAssets } from "@/hooks/usePurchasedAssets";
 
 export default function AssetDetailPage() {
   const params = useParams();
@@ -24,6 +25,10 @@ export default function AssetDetailPage() {
   const [datasetId, pieceId] = assetId.split('-').map(Number);
   const { data: allData } = useAllDatasets();
   const { creator, percentage } = useRoyaltyInfo(datasetId);
+  const { purchases } = usePurchasedAssets();
+
+  // Check if user has already purchased this asset
+  const hasPurchased = purchases.some(p => p.datasetId === datasetId && p.pieceId === pieceId);
 
   // Find the specific asset from marketplace data
   const assetData = allData?.datasets?.find(ds => ds.pdpVerifierDataSetId === datasetId);
@@ -186,28 +191,59 @@ export default function AssetDetailPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                {/* Show Buy button only if NOT purchased yet */}
+                {!hasPurchased && (
                   <button
                     onClick={() => setShowPurchaseModal(true)}
                     disabled={!canAfford || !address}
-                    className={`py-4 rounded-xl font-bold text-lg transition-all ${!canAfford || !address
+                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!canAfford || !address
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
                       }`}
                   >
                     {!address ? "Connect Wallet" : !canAfford ? "Insufficient Balance" : `💳 Buy ${totalPrice} USDFC`}
                   </button>
+                )}
+
+                {/* Show Mint button only AFTER purchase */}
+                {hasPurchased && (
                   <button
                     onClick={() => setShowMintModal(true)}
                     disabled={!address}
-                    className={`py-4 rounded-xl font-bold text-lg transition-all ${!address
+                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!address
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
                       }`}
                   >
-                    🪙 Mint NFT
+                    🪙 Mint NFT License
                   </button>
-                </div>
+                )}
+
+                {/* Info message: Must purchase before minting */}
+                {!hasPurchased && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl">
+                    <p className="text-sm font-semibold text-amber-800 mb-1 flex items-center gap-2">
+                      <span>💡</span>
+                      <span>NFT License Information</span>
+                    </p>
+                    <p className="text-xs text-amber-700">
+                      After purchasing this asset, you can mint an NFT license to verify your ownership on-chain. The Mint NFT button will appear after successful purchase.
+                    </p>
+                  </div>
+                )}
+
+                {/* Success badge if already purchased */}
+                {hasPurchased && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl">
+                    <p className="text-sm font-bold text-green-800 mb-1 flex items-center gap-2">
+                      <span>✅</span>
+                      <span>Asset Purchased!</span>
+                    </p>
+                    <p className="text-xs text-green-700">
+                      You own this asset. Click &quot;Mint NFT License&quot; to create an on-chain proof of ownership.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

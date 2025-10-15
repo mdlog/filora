@@ -18,11 +18,13 @@ export const useAllDatasets = () => {
       if (!synapse) throw new Error("Synapse not found");
       if (!warmStorageService) throw new Error("Warm storage service not found");
 
-      console.log("Registry assets:", registryAssets);
+      console.log("🔍 Registry assets from contract:", registryAssets);
+      console.log("📊 Registry has AssetRegistry?", !!CONTRACT_ADDRESSES.AssetRegistry);
+      console.log("📊 Registry assets count:", registryAssets?.length || 0);
 
       // Use registry if available
       if (CONTRACT_ADDRESSES.AssetRegistry && registryAssets && registryAssets.length > 0) {
-        console.log("Loading assets from registry:", registryAssets.length);
+        console.log("✅ Loading assets from AssetRegistry contract:", registryAssets.length, "assets");
         const allClientDatasets: DataSet[] = [];
 
         for (const asset of registryAssets) {
@@ -66,7 +68,13 @@ export const useAllDatasets = () => {
           }
         }
 
-        console.log("Total datasets from registry:", allClientDatasets.length);
+        console.log("✅ Total datasets loaded from registry:", allClientDatasets.length);
+        console.log("📊 Registry-based datasets:", allClientDatasets.map(d => ({
+          datasetId: d.pdpVerifierDataSetId,
+          provider: d.provider?.name,
+          owner: d.payer,
+          price: d.price
+        })));
         return { datasets: allClientDatasets };
       }
 
@@ -148,7 +156,8 @@ export const useAllDatasets = () => {
 
       return { datasets: allClientDatasets };
     },
-    staleTime: 30000,
-    refetchInterval: 60000,
+    staleTime: 10000, // 10 seconds - faster cache invalidation
+    refetchInterval: 15000, // 15 seconds - more frequent auto-refresh
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
   });
 };

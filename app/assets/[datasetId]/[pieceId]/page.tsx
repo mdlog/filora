@@ -13,6 +13,7 @@ import { getFilbeamPieceUrl } from "@/utils/filbeam";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { PurchaseModal } from "@/components/marketplace/PurchaseModal";
 import { useAssetCreator } from "@/hooks/useAssetCreator";
+import { usePurchasedAssets } from "@/hooks/usePurchasedAssets";
 
 export default function AssetDetailPage() {
   const params = useParams();
@@ -29,6 +30,10 @@ export default function AssetDetailPage() {
   const { creator, percentage } = useRoyaltyInfo(datasetId);
   const { price } = useAssetPrice(datasetId);
   const { creator: contractCreator } = useAssetCreator(datasetId);
+  const { purchases } = usePurchasedAssets();
+
+  // Check if user has already purchased this asset
+  const hasPurchased = purchases.some(p => p.datasetId === datasetId && p.pieceId === pieceId);
 
   const assetData = allData?.datasets?.find(ds => ds.pdpVerifierDataSetId === datasetId);
   const pieceData = assetData?.data?.pieces?.find(p => p.pieceId === pieceId);
@@ -209,7 +214,8 @@ export default function AssetDetailPage() {
                   </div>
                 )}
 
-                {displayPrice && parseFloat(displayPrice) > 0 && (
+                {/* Show Buy button only if NOT purchased yet */}
+                {!hasPurchased && displayPrice && parseFloat(displayPrice) > 0 && (
                   <button
                     onClick={() => setShowPurchaseModal(true)}
                     disabled={!address || !canPurchase}
@@ -225,16 +231,46 @@ export default function AssetDetailPage() {
                         : `💳 Buy for ${parseFloat(displayPrice).toFixed(2)} USDFC`}
                   </button>
                 )}
-                <button
-                  onClick={() => setShowMintModal(true)}
-                  disabled={!address}
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!address
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
-                    }`}
-                >
-                  {!address ? "Connect Wallet" : "🪙 Mint NFT License"}
-                </button>
+
+                {/* Show Mint button only AFTER purchase */}
+                {hasPurchased && (
+                  <button
+                    onClick={() => setShowMintModal(true)}
+                    disabled={!address}
+                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!address
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
+                      }`}
+                  >
+                    {!address ? "Connect Wallet" : "🪙 Mint NFT License"}
+                  </button>
+                )}
+
+                {/* Info message: Must purchase before minting */}
+                {!hasPurchased && displayPrice && parseFloat(displayPrice) > 0 && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl">
+                    <p className="text-sm font-semibold text-amber-800 mb-1 flex items-center gap-2">
+                      <span>💡</span>
+                      <span>NFT License Information</span>
+                    </p>
+                    <p className="text-xs text-amber-700">
+                      After purchasing this asset, you can mint an NFT license to verify your ownership on-chain. The Mint NFT button will appear after successful purchase.
+                    </p>
+                  </div>
+                )}
+
+                {/* Success badge if already purchased */}
+                {hasPurchased && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl">
+                    <p className="text-sm font-bold text-green-800 mb-1 flex items-center gap-2">
+                      <span>✅</span>
+                      <span>Asset Purchased!</span>
+                    </p>
+                    <p className="text-xs text-green-700">
+                      You own this asset. Click &quot;Mint NFT License&quot; to create an on-chain proof of ownership.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

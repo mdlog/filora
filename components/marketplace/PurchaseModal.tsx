@@ -115,9 +115,15 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
         tokenId: assetId,
       });
 
-      console.log("✅ Payment completed successfully!");
+      // ✅ IMPORTANT: Only add to purchased if payment actually succeeded
+      if (!result || !result.paymentHash) {
+        throw new Error("❌ Payment transaction failed - no transaction hash returned");
+      }
 
-      // Record purchase to localStorage
+      console.log("✅ Payment completed successfully!");
+      console.log("📝 Payment transaction hash:", result.paymentHash);
+
+      // Record purchase to localStorage ONLY after confirmed success
       await addPurchase({
         datasetId: assetId,
         pieceId: pieceId,
@@ -126,19 +132,42 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
         seller: seller,
         purchasedAt: Math.floor(Date.now() / 1000),
         txHash: result.paymentHash,
+        assetName: assetName, // Save asset name for display
+        // Note: We don't have original filename here, will be generic download
       });
 
-      console.log("✅ Purchase recorded!");
+      console.log("✅ Purchase recorded to localStorage!");
       triggerConfetti();
-      onClose();
+
+      // Small delay before closing to ensure user sees success message
+      setTimeout(() => {
+        onClose();
+      }, 1000);
     } catch (error: any) {
       console.error("❌ Purchase failed:", error);
-      console.error("Error details:", {
+      console.error("❌ Error details:", {
         message: error.message,
         code: error.code,
-        data: error.data
+        data: error.data,
+        name: error.name
       });
-      setError(error.message || "❌ Purchase failed. Please try again.");
+
+      // ⚠️ IMPORTANT: Do NOT add to purchased if payment failed!
+      console.warn("⚠️ Purchase was NOT recorded because payment failed");
+
+      // Show user-friendly error message
+      let errorMessage = error.message || "❌ Purchase failed. Please try again.";
+
+      // Add helpful context based on error type
+      if (error.message?.includes("user rejected")) {
+        errorMessage = "❌ Transaction cancelled by user. No charges were made.";
+      } else if (error.message?.includes("SysErr") || error.message?.includes("revert")) {
+        errorMessage = "❌ Transaction failed on blockchain. No charges were made.\n\nCommon causes:\n• Approval not confirmed (wait 10s, try again)\n• Insufficient balance\n• Network congestion\n\nPlease try again.";
+      } else if (error.message?.includes("insufficient")) {
+        errorMessage = "❌ Insufficient USDFC or tFIL balance.\n\nGet tokens from:\n• Dashboard → 'Get USDFC' button\n• Dashboard → 'Get tFIL' button";
+      }
+
+      setError(errorMessage);
     }
   };
 

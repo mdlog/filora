@@ -161,7 +161,7 @@ export const AssetAccessModal = ({ isOpen, onClose, asset }: AssetAccessModalPro
                 <p className="text-gray-600 mb-4">
                   You need to purchase this asset to access it.
                 </p>
-                <p className="text-lg font-bold text-indigo-600">Price: {asset.price} ETH</p>
+                <p className="text-lg font-bold text-indigo-600">Price: {asset.price} USDFC</p>
               </div>
             )}
           </div>

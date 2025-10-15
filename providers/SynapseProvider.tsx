@@ -25,20 +25,35 @@ export const SynapseProvider = ({
   const signer = useEthersSigner();
 
   const createSynapse = async () => {
-    if (!signer) return;
-    const synapse = await Synapse.create({
-      signer,
-      withCDN: config.withCDN,
-      disableNonceManager: false,
-    });
+    if (!signer) {
+      console.log("⏳ Waiting for signer...");
+      return;
+    }
 
-    const warmStorageService = await WarmStorageService.create(
-      synapse.getProvider(),
-      synapse.getWarmStorageAddress()
-    );
-    setSynapse(synapse);
-    setWarmStorageService(warmStorageService);
+    try {
+      console.log("🚀 Creating Synapse instance...");
+      const synapse = await Synapse.create({
+        signer,
+        withCDN: config.withCDN,
+        disableNonceManager: false,
+      });
+
+      console.log("✅ Synapse created successfully");
+
+      const warmStorageService = await WarmStorageService.create(
+        synapse.getProvider(),
+        synapse.getWarmStorageAddress()
+      );
+
+      console.log("✅ WarmStorageService created successfully");
+
+      setSynapse(synapse);
+      setWarmStorageService(warmStorageService);
+    } catch (error) {
+      console.error("❌ Error creating Synapse:", error);
+    }
   };
+
   useEffect(() => {
     createSynapse();
   }, [signer]);

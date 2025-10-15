@@ -21,7 +21,8 @@ export const UploadAsset = () => {
     name: "",
     description: "",
     price: "",
-    royaltyPercentage: "10" // Default 10% royalty
+    royaltyPercentage: "10", // Default 10% royalty
+    fileExtension: "" // File extension (e.g., jpg, pdf, mp4)
   });
   const [datasetId, setDatasetId] = useState<number | null>(null);
   const { uploadFileMutation, uploadedInfo, handleReset, status, progress } = useFileUpload();
@@ -53,7 +54,23 @@ export const UploadAsset = () => {
     setIsDragging(false);
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
-      setFile(files[0]);
+      const droppedFile = files[0];
+      setFile(droppedFile);
+
+      // Auto-detect and set file extension
+      const ext = droppedFile.name.split('.').pop() || '';
+      const nameWithoutExt = droppedFile.name.replace(/\.[^/.]+$/, '');
+      setMetadata(prev => ({
+        ...prev,
+        name: prev.name || nameWithoutExt, // Use filename as default name
+        fileExtension: ext.toLowerCase()
+      }));
+
+      console.log("📁 File dropped:", {
+        name: droppedFile.name,
+        extension: ext,
+        size: droppedFile.size
+      });
     }
   }, []);
 
@@ -217,7 +234,25 @@ export const UploadAsset = () => {
             id="fileInput"
             type="file"
             onChange={(e) => {
-              e.target.files && setFile(e.target.files[0]);
+              if (e.target.files && e.target.files[0]) {
+                const selectedFile = e.target.files[0];
+                setFile(selectedFile);
+
+                // Auto-detect and set file extension
+                const ext = selectedFile.name.split('.').pop() || '';
+                const nameWithoutExt = selectedFile.name.replace(/\.[^/.]+$/, '');
+                setMetadata(prev => ({
+                  ...prev,
+                  name: prev.name || nameWithoutExt, // Use filename as default name
+                  fileExtension: ext.toLowerCase()
+                }));
+
+                console.log("📁 File selected:", {
+                  name: selectedFile.name,
+                  extension: ext,
+                  size: selectedFile.size
+                });
+              }
               e.target.value = "";
             }}
             className="hidden"
@@ -244,14 +279,26 @@ export const UploadAsset = () => {
 
         <div className="space-y-4 mb-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Asset Name</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Asset Name
+              {metadata.fileExtension && (
+                <span className="ml-2 text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
+                  .{metadata.fileExtension}
+                </span>
+              )}
+            </label>
             <input
               type="text"
               value={metadata.name}
               onChange={(e) => setMetadata({ ...metadata, name: e.target.value })}
-              placeholder="Enter asset name"
+              placeholder="Enter asset name (extension will be added automatically)"
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
             />
+            {metadata.fileExtension && (
+              <p className="text-xs text-gray-500 mt-1">
+                💡 Full filename for buyers: <span className="font-mono font-semibold">{metadata.name || file?.name}.{metadata.fileExtension}</span>
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
@@ -327,7 +374,7 @@ export const UploadAsset = () => {
               handleReset();
               setFile(null);
               setDatasetId(null);
-              setMetadata({ name: "", description: "", price: "", royaltyPercentage: "10" });
+              setMetadata({ name: "", description: "", price: "", royaltyPercentage: "10", fileExtension: "" });
             }}
             disabled={!file || isUploading}
             className={`px-8 py-4 rounded-xl font-semibold transition-all ${!file || isUploading
