@@ -197,6 +197,29 @@ export const Dashboard = () => {
 
     return (
         <div className="space-y-6">
+            {/* Error Alert for Balance Fetching */}
+            {balancesError && (
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-500 text-white rounded-2xl shadow-lg p-4 flex items-center gap-3"
+                >
+                    <span className="text-2xl">⚠️</span>
+                    <div>
+                        <p className="font-bold">Failed to Load Balances</p>
+                        <p className="text-sm text-red-100">
+                            {balancesError.message || "Unable to fetch wallet balances. Please refresh the page."}
+                        </p>
+                        <button
+                            onClick={() => refetchBalances()}
+                            className="mt-2 px-4 py-1 bg-white text-red-600 rounded-lg text-sm font-semibold hover:bg-red-50 transition-colors"
+                        >
+                            🔄 Retry
+                        </button>
+                    </div>
+                </motion.div>
+            )}
+
             {/* Profile & Welcome Section */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}

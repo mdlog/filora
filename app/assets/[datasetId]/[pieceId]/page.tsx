@@ -14,6 +14,7 @@ import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { PurchaseModal } from "@/components/marketplace/PurchaseModal";
 import { useAssetCreator } from "@/hooks/useAssetCreator";
 import { usePurchasedAssets } from "@/hooks/usePurchasedAssets";
+import { AssetPreview } from "@/components/marketplace/AssetPreview";
 
 export default function AssetDetailPage() {
   const params = useParams();
@@ -23,6 +24,7 @@ export default function AssetDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [showMintModal, setShowMintModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const datasetId = parseInt(params.datasetId as string);
   const pieceId = parseInt(params.pieceId as string);
@@ -120,7 +122,20 @@ export default function AssetDetailPage() {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
-                  <span className="text-9xl relative z-10">🎨</span>
+
+                  {/* Preview Button Overlay */}
+                  <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
+                    <button
+                      onClick={() => setShowPreview(true)}
+                      className="bg-white/90 backdrop-blur-sm rounded-full p-4 shadow-lg hover:bg-white transition-colors"
+                      title="Preview Asset"
+                    >
+                      <svg className="w-8 h-8 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                  </div>
                 </>
               ) : (
                 <span className="text-9xl">🎨</span>
@@ -380,6 +395,21 @@ export default function AssetDetailPage() {
           price={displayPrice}
         />
       )}
+
+      {/* Asset Preview Modal */}
+      <AssetPreview
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        asset={{
+          datasetId,
+          pieceId,
+          pieceCid: pieceData?.pieceCid?.toString() || "",
+          name: asset.name,
+          filename: (pieceData as any)?.filename,
+          price: displayPrice,
+          owner: asset.owner
+        }}
+      />
     </div>
   );
 }

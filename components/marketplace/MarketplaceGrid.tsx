@@ -5,17 +5,25 @@ import { DataSet } from "@/types";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
+import { AssetPreview } from "./AssetPreview";
+import { MediaViewer } from "./MediaViewer";
+import { EnhancedSearchFilter, SearchFilters } from "./EnhancedSearchFilter";
+import {
+  filterAssets,
+  sortAssets,
+  detectAssetCategory,
+  generateAssetTags,
+  MarketplaceAsset as EnhancedAsset
+} from "@/utils/searchUtils";
 
 export const MarketplaceGrid = () => {
   const router = useRouter();
   const { address } = useAccount();
   const { data, isLoading, error, refetch } = useAllDatasets();
-  const [searchTerm, setSearchTerm] = useState("");
-
   console.log("Marketplace data:", data);
   console.log("Marketplace loading:", isLoading);
   console.log("Marketplace error:", error);
-  
+
   // Debug: Show all datasets with their owners
   if (data?.datasets) {
     console.log("📊 All datasets in marketplace:", data.datasets.map((d: any) => ({
@@ -25,12 +33,36 @@ export const MarketplaceGrid = () => {
       pieces: d.data?.pieces?.length || 0
     })));
   }
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "id-asc" | "id-desc">("newest");
-  const [filterStatus, setFilterStatus] = useState<"all" | "live" | "inactive">("all");
-  const [filterProvider, setFilterProvider] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "by-owner">("grid");
   const itemsPerPage = 6; // 6 items per page (2 rows of 3 in grid view)
+
+  // Enhanced search filters
+  const [enhancedFilters, setEnhancedFilters] = useState<SearchFilters>({
+    searchTerm: "",
+    category: "all",
+    priceRange: { min: 0, max: 1000 },
+    tags: [],
+    creator: "",
+    sortBy: "newest",
+    status: "all",
+    provider: "all",
+    dateRange: { start: "", end: "" },
+    fileSize: { min: 0, max: 100 },
+    licenseType: "all",
+  });
+
+  // Asset preview states
+  const [previewAsset, setPreviewAsset] = useState<{
+    datasetId: number;
+    pieceId: number;
+    pieceCid: string;
+    name?: string;
+    filename?: string;
+    price?: string;
+    owner?: string;
+  } | null>(null);
 
   // Don't return early - show UI always
 
@@ -103,57 +135,57 @@ export const MarketplaceGrid = () => {
   }, {} as Record<string, typeof allAssets>);
 
   const uniqueOwners = Object.keys(assetsByOwner).length;
-  const uniqueProviders = [...new Set(allAssets.map(a => a?.provider).filter(Boolean))];
 
-  const filteredAssets = allAssets
-    .filter((asset) => {
-      if (!asset) return false;
-      const search = searchTerm.toLowerCase();
-      const matchSearch =
-        asset.pieceCid.toLowerCase().includes(search) ||
-        asset.pieceId.toString().includes(search) ||
-        asset.provider.toLowerCase().includes(search) ||
-        (asset.owner && asset.owner.toLowerCase().includes(search));
+  // Convert to enhanced assets format
+  const enhancedAssets: EnhancedAsset[] = allAssets.map(asset => ({
+    datasetId: asset.datasetId,
+    pieceId: asset.pieceId,
+    pieceCid: asset.pieceCid,
+    providerId: asset.providerId,
+    provider: asset.provider,
+    owner: asset.owner,
+    price: asset.price,
+    isLive: asset.isLive,
+    filename: (asset as any).filename,
+    assetName: getAssetName(asset),
+    uploadedAt: new Date(), // Mock date for now
+    fileSize: Math.random() * 100 * 1024 * 1024, // Mock file size
+    tags: generateAssetTags({
+      datasetId: asset.datasetId,
+      pieceId: asset.pieceId,
+      pieceCid: asset.pieceCid,
+      providerId: asset.providerId,
+      provider: asset.provider,
+      owner: asset.owner,
+      price: asset.price,
+      isLive: asset.isLive,
+      filename: (asset as any).filename,
+      assetName: getAssetName(asset),
+    }),
+    category: detectAssetCategory((asset as any).filename, asset.pieceCid),
+    description: `${getAssetName(asset)} - Digital asset stored on Filecoin`,
+    viewCount: Math.floor(Math.random() * 1000),
+    downloadCount: Math.floor(Math.random() * 100),
+    purchaseCount: Math.floor(Math.random() * 50),
+  }));
 
-      const matchStatus =
-        filterStatus === "all" ? true :
-          filterStatus === "live" ? asset.isLive :
-            !asset.isLive;
-
-      const matchProvider = filterProvider === "all" || asset.provider === filterProvider;
-
-      return matchSearch && matchStatus && matchProvider;
-    })
-    .sort((a, b) => {
-      if (!a || !b) return 0;
-      switch (sortBy) {
-        case "newest":
-          return b.datasetId - a.datasetId;
-        case "oldest":
-          return a.datasetId - b.datasetId;
-        case "id-asc":
-          return a.pieceId - b.pieceId;
-        case "id-desc":
-          return b.pieceId - a.pieceId;
-        default:
-          return 0;
-      }
-    });
+  // Use enhanced filtering and sorting
+  const filteredAssets = sortAssets(filterAssets(enhancedAssets, enhancedFilters), enhancedFilters.sortBy);
 
   const totalPages = Math.ceil(filteredAssets.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentAssets = filteredAssets.slice(startIndex, endIndex);
 
-  // Reset to page 1 when search term changes
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
+  // Handle enhanced filters change
+  const handleEnhancedFiltersChange = (newFilters: SearchFilters) => {
+    setEnhancedFilters(newFilters);
     setCurrentPage(1);
   };
 
   return (
     <div>
-      {/* Search and Filter - Always visible */}
+      {/* Enhanced Search and Filter */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -178,93 +210,13 @@ export const MarketplaceGrid = () => {
             {isLoading ? 'Refreshing...' : 'Refresh Now'}
           </button>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-white rounded-2xl shadow-lg p-4">
-            <div className="flex items-center gap-4">
-              <span className="text-2xl">🔍</span>
-              <input
-                type="text"
-                placeholder="Search by CID, Asset ID, or Provider..."
-                value={searchTerm}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => handleSearch("")}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-4 flex gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:outline-none text-sm"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="id-asc">ID: Low to High</option>
-                <option value="id-desc">ID: High to Low</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700">Provider:</span>
-              <select
-                value={filterProvider}
-                onChange={(e) => setFilterProvider(e.target.value)}
-                className="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:outline-none text-sm"
-              >
-                <option value="all">All Providers</option>
-                {uniqueProviders.map((provider) => (
-                  <option key={provider} value={provider}>{provider}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700">Status:</span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setFilterStatus("all")}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === "all"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setFilterStatus("live")}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === "live"
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                >
-                  Live
-                </button>
-                <button
-                  onClick={() => setFilterStatus("inactive")}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${filterStatus === "inactive"
-                    ? "bg-gray-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                >
-                  Inactive
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Enhanced Search Filter Component */}
+        <EnhancedSearchFilter
+          onFiltersChange={handleEnhancedFiltersChange}
+          totalAssets={enhancedAssets.length}
+          filteredCount={filteredAssets.length}
+        />
       </motion.div>
 
       {/* Stats Cards */}
@@ -274,10 +226,10 @@ export const MarketplaceGrid = () => {
           animate={{ opacity: 1, y: 0 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
         >
-          <StatCard icon="📦" label="Total Assets" value={allAssets.length} />
-          <StatCard icon="✅" label="Live Assets" value={allAssets.filter((a) => a?.isLive).length} />
+          <StatCard icon="📦" label="Total Assets" value={enhancedAssets.length} />
+          <StatCard icon="✅" label="Live Assets" value={enhancedAssets.filter((a) => a.isLive).length} />
           <StatCard icon="👥" label="Unique Owners" value={uniqueOwners} />
-          <StatCard icon="🗂️" label="Datasets" value={data?.datasets?.length || 0} />
+          <StatCard icon="🗂️" label="Filtered Results" value={filteredAssets.length} />
         </motion.div>
       )}
 
@@ -467,7 +419,7 @@ export const MarketplaceGrid = () => {
                   <div className="mt-4 text-center">
                     <button
                       onClick={() => {
-                        setSearchTerm(owner);
+                        setEnhancedFilters(prev => ({ ...prev, creator: owner }));
                         setViewMode("grid");
                       }}
                       className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
@@ -485,16 +437,16 @@ export const MarketplaceGrid = () => {
           animate={{ opacity: 1 }}
           className="text-center py-20 bg-white rounded-2xl shadow-lg"
         >
-          <div className="text-6xl mb-4">{searchTerm ? "🔍" : "🎨"}</div>
+          <div className="text-6xl mb-4">{enhancedFilters.searchTerm ? "🔍" : "🎨"}</div>
           <h3 className="text-2xl font-bold text-gray-800 mb-2">
-            {searchTerm ? "No Matching Assets" : "No Assets Found"}
+            {enhancedFilters.searchTerm ? "No Matching Assets" : "No Assets Found"}
           </h3>
           <p className="text-gray-600">
-            {searchTerm ? "Try a different search term" : "Start by uploading your first digital asset!"}
+            {enhancedFilters.searchTerm ? "Try a different search term" : "Start by uploading your first digital asset!"}
           </p>
-          {searchTerm && (
+          {enhancedFilters.searchTerm && (
             <button
-              onClick={() => handleSearch("")}
+              onClick={() => setEnhancedFilters(prev => ({ ...prev, searchTerm: "" }))}
               className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors"
             >
               Clear Search
@@ -515,18 +467,42 @@ export const MarketplaceGrid = () => {
                   onClick={() => router.push(`/assets/${asset.datasetId}/${asset.pieceId}`)}
                   className="bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer"
                 >
-                  <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 h-48 flex items-center justify-center relative overflow-hidden">
-                    {asset.owner && (
-                      <img
-                        src={`https://${asset.owner}.calibration.filcdn.io/${asset.pieceCid}`}
-                        alt={`Asset ${asset.pieceId}`}
-                        className="w-full h-full object-cover absolute inset-0"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                  {/* Media Preview Section */}
+                  <div className="relative">
+                    <MediaViewer
+                      pieceCid={asset.pieceCid}
+                      filename={asset.filename}
+                      assetName={getAssetName(asset)}
+                      className="h-48"
+                      showPreview={true}
+                    />
+
+                    {/* Preview Button Overlay */}
+                    <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreviewAsset({
+                            datasetId: asset.datasetId,
+                            pieceId: asset.pieceId,
+                            pieceCid: asset.pieceCid,
+                            name: getAssetName(asset),
+                            filename: (asset as any).filename,
+                            price: asset.price !== undefined ? (asset.price / 1e18).toFixed(2) : "0",
+                            owner: asset.owner
+                          });
                         }}
-                      />
-                    )}
-                    <span className="text-6xl relative z-10">🎨</span>
+                        className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-white transition-colors"
+                        title="Preview Asset"
+                      >
+                        <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Price Badge */}
                     {asset.price !== undefined && asset.price > 0 && (
                       <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg z-20">
                         <span className="text-sm font-bold text-indigo-600">{(asset.price / 1e18).toFixed(2)} USDFC</span>
@@ -705,6 +681,15 @@ export const MarketplaceGrid = () => {
             </motion.div>
           )}
         </>
+      )}
+
+      {/* Asset Preview Modal */}
+      {previewAsset && (
+        <AssetPreview
+          isOpen={!!previewAsset}
+          onClose={() => setPreviewAsset(null)}
+          asset={previewAsset}
+        />
       )}
     </div>
   );

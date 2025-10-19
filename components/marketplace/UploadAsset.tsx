@@ -8,8 +8,18 @@ import { useAccount } from "wagmi";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useRouter } from "next/navigation";
 import { CONTRACT_ADDRESSES } from "@/contracts/addresses";
-import { FILECOIN_PAY_ABI } from "@/contracts/abis";
+import { FilecoinPayABI } from "@/contracts/abis";
 import { parseEther } from "ethers";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Slider } from "@/components/ui/Slider";
+import { Button } from "@/components/ui/Button";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Progress } from "@/components/ui/Progress";
+import { Alert } from "@/components/ui/Alert";
+import { FileText, DollarSign, Upload as UploadIcon, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 export const UploadAsset = () => {
   const { address } = useAccount();
@@ -57,17 +67,18 @@ export const UploadAsset = () => {
       const droppedFile = files[0];
       setFile(droppedFile);
 
-      // Auto-detect and set file extension
-      const ext = droppedFile.name.split('.').pop() || '';
-      const nameWithoutExt = droppedFile.name.replace(/\.[^/.]+$/, '');
+      // ✅ Auto-fill Asset Name with full filename including extension
+      const fullFileName = droppedFile.name;
+      const ext = fullFileName.split('.').pop() || '';
+
       setMetadata(prev => ({
         ...prev,
-        name: prev.name || nameWithoutExt, // Use filename as default name
+        name: fullFileName, // ✅ Use full filename with extension
         fileExtension: ext.toLowerCase()
       }));
 
       console.log("📁 File dropped:", {
-        name: droppedFile.name,
+        name: fullFileName,
         extension: ext,
         size: droppedFile.size
       });
@@ -238,17 +249,18 @@ export const UploadAsset = () => {
                 const selectedFile = e.target.files[0];
                 setFile(selectedFile);
 
-                // Auto-detect and set file extension
-                const ext = selectedFile.name.split('.').pop() || '';
-                const nameWithoutExt = selectedFile.name.replace(/\.[^/.]+$/, '');
+                // ✅ Auto-fill Asset Name with full filename including extension
+                const fullFileName = selectedFile.name;
+                const ext = fullFileName.split('.').pop() || '';
+
                 setMetadata(prev => ({
                   ...prev,
-                  name: prev.name || nameWithoutExt, // Use filename as default name
+                  name: fullFileName, // ✅ Use full filename with extension
                   fileExtension: ext.toLowerCase()
                 }));
 
                 console.log("📁 File selected:", {
-                  name: selectedFile.name,
+                  name: fullFileName,
                   extension: ext,
                   size: selectedFile.size
                 });
@@ -277,63 +289,61 @@ export const UploadAsset = () => {
           </div>
         </div>
 
-        <div className="space-y-4 mb-6">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Asset Name
-              {metadata.fileExtension && (
-                <span className="ml-2 text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
-                  .{metadata.fileExtension}
-                </span>
-              )}
-            </label>
-            <input
-              type="text"
+        <div className="space-y-6 mb-6">
+          {/* Asset Name Input with Badge */}
+          <div className="relative">
+            <Input
+              label="Asset Name"
               value={metadata.name}
               onChange={(e) => setMetadata({ ...metadata, name: e.target.value })}
-              placeholder="Enter asset name (extension will be added automatically)"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
-            />
-            {metadata.fileExtension && (
-              <p className="text-xs text-gray-500 mt-1">
-                💡 Full filename for buyers: <span className="font-mono font-semibold">{metadata.name || file?.name}.{metadata.fileExtension}</span>
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-            <textarea
-              value={metadata.description}
-              onChange={(e) => setMetadata({ ...metadata, description: e.target.value })}
-              placeholder="Describe your digital asset"
-              rows={4}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
+              placeholder="Select a file to auto-fill name with extension"
+              icon={<FileText className="w-5 h-5" />}
+              helperText={
+                file && metadata.name
+                  ? `Filename for buyers: ${metadata.name}`
+                  : "Upload a file first, and the name will be auto-filled"
+              }
+              error={!metadata.name && file ? "Asset name is required" : undefined}
             />
           </div>
+
+          {/* Description Textarea */}
+          <Textarea
+            label="Description"
+            value={metadata.description}
+            onChange={(e) => setMetadata({ ...metadata, description: e.target.value })}
+            placeholder="Describe your digital asset in detail"
+            rows={4}
+            maxLength={500}
+            showCount
+            helperText="Provide a detailed description to attract buyers"
+          />
+
+          {/* Price Input */}
+          <Input
+            label="Price (USDFC)"
+            type="number"
+            value={metadata.price}
+            onChange={(e) => setMetadata({ ...metadata, price: e.target.value })}
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+            icon={<DollarSign className="w-5 h-5" />}
+            helperText="Set the price for your asset in USDFC tokens"
+            error={metadata.price && parseFloat(metadata.price) < 0 ? "Price must be positive" : undefined}
+          />
+
+          {/* Royalty Slider */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Price (USDFC)</label>
-            <input
-              type="number"
-              value={metadata.price}
-              onChange={(e) => setMetadata({ ...metadata, price: e.target.value })}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Royalty Percentage (%)
-            </label>
-            <input
-              type="number"
-              value={metadata.royaltyPercentage}
+            <Slider
+              label="Royalty Percentage"
+              value={Number(metadata.royaltyPercentage) || 0}
               onChange={(e) => setMetadata({ ...metadata, royaltyPercentage: e.target.value })}
-              placeholder="10"
-              step="1"
-              min="0"
-              max="100"
+              min={0}
+              max={100}
+              showValue
+              formatValue={(v) => `${v}%`}
+              marks={[0, 25, 50, 75, 100]}
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -347,18 +357,81 @@ export const UploadAsset = () => {
             onClick={async () => {
               if (!file || !address) return;
               try {
+                console.log("🚀 Starting upload process...");
+                console.log("📋 Upload metadata:", {
+                  fileName: metadata.name,
+                  price: metadata.price,
+                  royalty: metadata.royaltyPercentage,
+                });
+
                 // Upload file to Filecoin with price
                 const priceInWei = metadata.price ? parseEther(metadata.price) : BigInt(0);
+                console.log("💰 Price in Wei:", priceInWei.toString());
+
                 const result = await uploadFile({ file, price: priceInWei.toString() });
 
                 // File uploaded successfully
                 if (result?.pieceCid) {
                   console.log("✅ File uploaded with Piece CID:", result.pieceCid);
-                  // Note: Price and royalty settings are handled by the smart contract
-                  // during the asset registration process in useFileUpload
+
+                  // Store dataset ID for royalty and price setting
+                  if ((result as any).datasetId) {
+                    setDatasetId((result as any).datasetId);
+                    console.log("📝 Dataset ID stored:", (result as any).datasetId);
+
+                    // ✅ CRITICAL: Set price in FilecoinPay contract
+                    if (metadata.price && parseFloat(metadata.price) > 0) {
+                      console.log("💰 Setting price in FilecoinPay:", metadata.price);
+                      try {
+                        const priceWei = parseEther(metadata.price);
+                        console.log("💰 Price in Wei:", priceWei.toString());
+
+                        const priceTxHash = await writeContract({
+                          address: CONTRACT_ADDRESSES.FilecoinPay as `0x${string}`,
+                          abi: FilecoinPayABI,
+                          functionName: "setPrice",
+                          args: [BigInt((result as any).datasetId), priceWei],
+                        });
+
+                        console.log("✅ Price set in FilecoinPay:", priceTxHash);
+                      } catch (priceError: any) {
+                        console.error("⚠️ Failed to set price in FilecoinPay:", priceError);
+                        console.warn("Upload succeeded but price setting in FilecoinPay failed. Purchases will fail!");
+                      }
+                    }
+
+                    // Set royalty if percentage is provided
+                    if (metadata.royaltyPercentage && parseFloat(metadata.royaltyPercentage) > 0) {
+                      console.log("💎 Setting royalty percentage:", metadata.royaltyPercentage);
+                      try {
+                        // Convert percentage to basis points (e.g., 10% = 1000 basis points)
+                        const royaltyBasisPoints = Math.floor(parseFloat(metadata.royaltyPercentage) * 100);
+
+                        console.log("📊 Royalty basis points:", royaltyBasisPoints);
+                        console.log("🎨 Setting royalty for dataset:", result.datasetId);
+                        console.log("👤 Creator address:", address);
+
+                        // Call FilecoinPay contract to set royalty
+                        const royaltyTxHash = await writeContract({
+                          address: CONTRACT_ADDRESSES.FilecoinPay as `0x${string}`,
+                          abi: FilecoinPayABI,
+                          functionName: "setRoyalty",
+                          args: [BigInt((result as any).datasetId), address, BigInt(royaltyBasisPoints)],
+                        });
+
+                        console.log("✅ Royalty transaction sent:", royaltyTxHash);
+                      } catch (royaltyError: any) {
+                        console.error("⚠️ Failed to set royalty:", royaltyError);
+                        // Don't fail the whole upload if royalty setting fails
+                        console.warn("Upload succeeded but royalty setting failed. You can set it later.");
+                      }
+                    }
+                  }
+
+                  console.log("🎉 Upload process completed successfully!");
                 }
               } catch (error) {
-                console.error("Upload failed:", error);
+                console.error("❌ Upload failed:", error);
               }
             }}
             disabled={!file || isUploading || !!uploadedInfo || !address}

@@ -37,6 +37,19 @@ export interface DatasetsResponse {
   datasets: DataSet[];
 }
 
+export interface MarketplaceAsset {
+  datasetId: number;
+  pieceId: number;
+  pieceCid: string;
+  providerId: number;
+  provider: string;
+  owner: string;
+  price?: number;
+  isLive: boolean;
+  filename?: string;
+  assetName?: string;
+}
+
 /**
  * Interface for formatted balance data returned by useBalances
  */

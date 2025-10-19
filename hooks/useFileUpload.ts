@@ -217,7 +217,11 @@ export const useFileUpload = () => {
             console.log(`Dataset ID: ${uploadedToDatasetId}, Provider ID: ${uploadedToProviderId}, PieceCID: ${currentPieceCid}`);
             setStatus("✅ Asset already in marketplace!");
             setProgress(100);
-            return { pieceCid: currentPieceCid };
+            return {
+              pieceCid: currentPieceCid,
+              datasetId: uploadedToDatasetId, // ✅ Return datasetId for royalty setting
+              providerId: uploadedToProviderId
+            };
           } else {
             // DIFFERENT piece CID - this is a NEW file in the same dataset!
             console.warn("⚠️ Different piece detected!");
@@ -233,6 +237,8 @@ export const useFileUpload = () => {
             // Return with a flag indicating this is a non-registry upload
             return {
               pieceCid: currentPieceCid,
+              datasetId: uploadedToDatasetId, // ✅ Return datasetId for royalty setting
+              providerId: uploadedToProviderId,
               skippedReason: "dataset_already_registered",
               existingPieceCid: existingAsset.pieceCid
             };
@@ -250,14 +256,23 @@ export const useFileUpload = () => {
             priceValue
           );
           setStatus("⏳ Waiting for registry transaction confirmation...");
-          return { txHash, pieceCid: pieceCid.toV1().toString() };
+          return {
+            txHash,
+            pieceCid: pieceCid.toV1().toString(),
+            datasetId: uploadedToDatasetId, // ✅ Return datasetId for royalty setting
+            providerId: uploadedToProviderId
+          };
         } catch (error: any) {
           console.error("Registry registration failed:", error);
           // If registration fails but file is uploaded, still return success
           if (error.message?.includes("already registered") ||
             error.message?.includes("duplicate")) {
             setStatus("✅ File uploaded successfully! (Already in marketplace)");
-            return { pieceCid: pieceCid.toV1().toString() };
+            return {
+              pieceCid: pieceCid.toV1().toString(),
+              datasetId: uploadedToDatasetId, // ✅ Return datasetId for royalty setting
+              providerId: uploadedToProviderId
+            };
           }
           throw error;
         }
@@ -266,7 +281,11 @@ export const useFileUpload = () => {
         setStatus("✅ File uploaded successfully! (No registry registration)");
         setProgress(100);
       }
-      return { pieceCid: pieceCid.toV1().toString() };
+      return {
+        pieceCid: pieceCid.toV1().toString(),
+        datasetId: uploadedToDatasetId, // ✅ Return datasetId even if no registry
+        providerId: uploadedToProviderId
+      };
     },
     onSuccess: async (data) => {
       if (data?.txHash) {

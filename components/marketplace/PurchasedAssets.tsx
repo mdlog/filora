@@ -4,23 +4,53 @@ import { useDownloadPiece } from "@/hooks/useDownloadPiece";
 import { useLicenseVerification } from "@/hooks/useLicenseVerification";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ShoppingCart } from "lucide-react";
 
 export const PurchasedAssets = () => {
-  const { purchases } = usePurchasedAssets();
+  const { purchases, refreshPurchases, debugLocalStorage } = usePurchasedAssets();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
+  console.log("🛒 PurchasedAssets rendered:", {
+    purchaseCount: purchases.length,
+    purchases: purchases
+  });
+
   if (purchases.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="text-center py-20 bg-white rounded-2xl shadow-lg"
-      >
-        <div className="text-6xl mb-4">🛒</div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-2">No Purchases Yet</h3>
-        <p className="text-gray-600">Buy your first digital asset to access it here!</p>
-      </motion.div>
+      <div className="bg-white rounded-2xl shadow-lg">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">My Purchased Assets</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={debugLocalStorage}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+              >
+                <span>🔍</span>
+                Debug
+              </button>
+              <button
+                onClick={refreshPurchases}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+              >
+                <span>🔄</span>
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+        <EmptyState
+          icon={<ShoppingCart className="w-24 h-24" />}
+          title="No Purchases Yet"
+          description="Start exploring the marketplace to find amazing digital assets and make your first purchase!"
+          action={{
+            label: "Browse Marketplace",
+            onClick: () => window.location.href = "/?tab=marketplace"
+          }}
+        />
+      </div>
     );
   }
 
@@ -30,6 +60,25 @@ export const PurchasedAssets = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800">My Purchased Assets ({purchases.length})</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={debugLocalStorage}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+          >
+            <span>🔍</span>
+            Debug
+          </button>
+          <button
+            onClick={refreshPurchases}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+          >
+            <span>🔄</span>
+            Refresh
+          </button>
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {currentPurchases.map((purchase, index) => (
           <PurchasedAssetCard

@@ -11,10 +11,20 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { Navbar } from "@/components/ui/Navbar";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { ConfettiProvider } from "@/providers/ConfettiProvider";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 import Footer from "@/components/ui/Footer";
 import { GeolocationProvider } from "@/providers/GeolocationProvider";
 import { SynapseProvider } from "@/providers/SynapseProvider";
-const queryClient = new QueryClient();
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Prevent excessive refetching
+      retry: 2,
+      staleTime: 5000,
+    },
+  },
+});
 
 const config = createConfig({
   chains: [filecoinCalibration, filecoin],
@@ -23,6 +33,7 @@ const config = createConfig({
     [filecoin.id]: http(),
     [filecoinCalibration.id]: http(),
   },
+  ssr: false, // Disable SSR for client-side wallet connection
 });
 
 export default function RootLayout({
@@ -61,6 +72,7 @@ export default function RootLayout({
                     initialChain={filecoinCalibration.id}
                   >
                     <SynapseProvider>
+                      <ToastProvider />
                       <main className="flex flex-col min-h-screen">
                         <Navbar />
                         {children}

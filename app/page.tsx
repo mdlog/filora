@@ -14,6 +14,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { Hero } from "@/components/Hero";
 import { RoyaltyManager } from "@/components/marketplace/RoyaltyManager";
 import { PurchasedAssets } from "@/components/marketplace/PurchasedAssets";
+import { Store, Upload, Image, ShoppingCart, DollarSign, LayoutDashboard } from "lucide-react";
 
 type Tab = "marketplace" | "upload" | "my-assets" | "purchased" | "royalties" | "dashboard";
 
@@ -164,42 +165,42 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-lg p-2 mb-8 flex gap-2 overflow-x-auto"
+              className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-2 mb-8 flex gap-2 overflow-x-auto border border-gray-100"
             >
               <TabButton
                 active={activeTab === "marketplace"}
                 onClick={() => handleTabChange("marketplace")}
-                icon="🏪"
+                icon={<Store className="w-5 h-5" />}
                 label="Marketplace"
               />
               <TabButton
                 active={activeTab === "upload"}
                 onClick={() => handleTabChange("upload")}
-                icon="📤"
-                label="Upload Asset"
+                icon={<Upload className="w-5 h-5" />}
+                label="Upload"
               />
               <TabButton
                 active={activeTab === "my-assets"}
                 onClick={() => handleTabChange("my-assets")}
-                icon="🖼️"
+                icon={<Image className="w-5 h-5" />}
                 label="My Assets"
               />
               <TabButton
                 active={activeTab === "purchased"}
                 onClick={() => handleTabChange("purchased")}
-                icon="🛒"
+                icon={<ShoppingCart className="w-5 h-5" />}
                 label="Purchased"
               />
               <TabButton
                 active={activeTab === "royalties"}
                 onClick={() => handleTabChange("royalties")}
-                icon="💰"
+                icon={<DollarSign className="w-5 h-5" />}
                 label="Royalties"
               />
               <TabButton
                 active={activeTab === "dashboard"}
                 onClick={() => handleTabChange("dashboard")}
-                icon="📊"
+                icon={<LayoutDashboard className="w-5 h-5" />}
                 label="Dashboard"
               />
             </motion.div>
@@ -288,19 +289,19 @@ const TabButton = ({
 }: {
   active: boolean;
   onClick: () => void;
-  icon: string;
+  icon: React.ReactNode;
   label: string;
 }) => (
   <motion.button
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
+    whileHover={{ scale: 1.02, y: -2 }}
+    whileTap={{ scale: 0.98 }}
     onClick={onClick}
     className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${active
-      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/50"
+      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
       }`}
   >
-    <span className="text-xl">{icon}</span>
+    {icon}
     <span>{label}</span>
   </motion.button>
 );

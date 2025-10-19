@@ -8,9 +8,17 @@ import { NFTMintModal } from "@/components/marketplace/NFTMintModal";
 import { PurchaseModal } from "@/components/marketplace/PurchaseModal";
 import { LicenseVerificationBadge } from "@/components/marketplace/LicenseVerificationBadge";
 import { useRoyaltyInfo } from "@/hooks/useRoyaltyInfo";
-import { useQuery } from "@tanstack/react-query";
 import { useAllDatasets } from "@/hooks/useAllDatasets";
 import { usePurchasedAssets } from "@/hooks/usePurchasedAssets";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Avatar } from "@/components/ui/Avatar";
+import { Button } from "@/components/ui/Button";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { Alert } from "@/components/ui/Alert";
+import { Info, History, Tag, FileText, Share2, Heart, ShoppingCart, Coins } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AssetDetailPage() {
   const params = useParams();
@@ -66,111 +74,146 @@ export default function AssetDetailPage() {
           <span>←</span> Back to Marketplace
         </motion.button>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Asset Image */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-white rounded-2xl shadow-xl overflow-hidden"
+            className="space-y-4"
           >
-            <div className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 h-96 flex items-center justify-center">
+            <div className="aspect-square bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center overflow-hidden relative group">
               <span className="text-9xl">🎨</span>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${asset.status === "Live" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
-                  }`}>
-                  {asset.status === "Live" ? "✅ Live" : "⏸️ Inactive"}
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
-                  {asset.category}
-                </span>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Created:</span>
-                  <span className="font-semibold">{asset.created}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Owner:</span>
-                  <span className="font-mono text-xs">{asset.owner.length > 20 ? `${asset.owner.slice(0, 6)}...${asset.owner.slice(-4)}` : asset.owner}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Provider:</span>
-                  <span className="text-xs">{asset.provider}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Piece CID:</span>
-                  <p className="font-mono text-xs break-all bg-gray-50 p-2 rounded mt-1">
-                    {asset.pieceCid}
-                  </p>
-                </div>
+
+              {/* Action Overlay */}
+              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Tooltip content="Share this asset" side="left">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Share2 className="w-4 h-4" />}
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success("Link copied to clipboard!");
+                    }}
+                    className="bg-white/90 backdrop-blur-sm hover:bg-white"
+                  />
+                </Tooltip>
+                <Tooltip content="Add to favorites" side="left">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Heart className="w-4 h-4" />}
+                    className="bg-white/90 backdrop-blur-sm hover:bg-white"
+                  />
+                </Tooltip>
               </div>
             </div>
           </motion.div>
 
+          {/* Right Column - Asset Details */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             className="space-y-6"
           >
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="flex items-start justify-between mb-4">
                 <h1 className="text-4xl font-bold text-gray-800">{asset.name}</h1>
-                <LicenseVerificationBadge tokenId={assetId} />
+                <div className="flex items-center gap-2">
+                  <LicenseVerificationBadge tokenId={assetId} />
+                  {asset.status === "Live" && (
+                    <Badge variant="live">
+                      Live
+                    </Badge>
+                  )}
+                </div>
               </div>
-              <p className="text-gray-600 mb-6 leading-relaxed">{asset.description}</p>
+              <p className="text-gray-600 leading-relaxed">{asset.description}</p>
+            </div>
+
+            {/* Owner Info */}
+            <Card variant="gradient">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Avatar
+                    fallback={asset.owner?.slice(0, 2).toUpperCase() || "??"}
+                    size="lg"
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-500">Owner</p>
+                    <p className="font-semibold text-gray-800">
+                      {asset.owner ? `${asset.owner.slice(0, 6)}...${asset.owner.slice(-4)}` : "Unknown"}
+                    </p>
+                  </div>
+                  <Tooltip content="View owner profile">
+                    <Button variant="ghost" size="sm" icon={<Info className="w-4 h-4" />} />
+                  </Tooltip>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Price & Royalty */}
+            <div className="grid grid-cols-2 gap-4">
+              <Card variant="elevated">
+                <CardContent className="p-4 text-center">
+                  <Coins className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">Current Price</p>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    {asset.price} USDFC
+                  </p>
+                </CardContent>
+              </Card>
 
               {creator && percentage && (
-                <div className="bg-purple-50 rounded-xl p-4 mb-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl">🎨</span>
-                    <span className="font-semibold text-gray-800">Creator Royalties</span>
-                  </div>
-                  <p className="text-sm text-gray-600">Creator: {creator.slice(0, 6)}...{creator.slice(-4)}</p>
-                  <p className="text-sm text-gray-600">Royalty: {Number(percentage) / 100}%</p>
-                </div>
+                <Card variant="elevated">
+                  <CardContent className="p-4 text-center">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <span className="text-purple-600 font-bold text-sm">%</span>
+                    </div>
+                    <p className="text-sm text-gray-500">Creator Royalty</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {(Number(percentage) / 100).toFixed(1)}%
+                    </p>
+                  </CardContent>
+                </Card>
               )}
+            </div>
 
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6">
-                <p className="text-sm text-gray-600 mb-2">Current Price</p>
-                <p className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-                  {asset.price} USDFC
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Quantity
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-12 h-12 rounded-xl bg-gray-200 hover:bg-gray-300 font-bold text-xl"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-20 text-center text-2xl font-bold border-2 border-gray-200 rounded-xl py-2"
-                    />
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="w-12 h-12 rounded-xl bg-gray-200 hover:bg-gray-300 font-bold text-xl"
-                    >
-                      +
-                    </button>
-                  </div>
+            {/* Quantity Selector */}
+            <Card>
+              <CardContent className="p-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Quantity
+                </label>
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  >
+                    -
+                  </Button>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-20 text-center text-2xl font-bold border-2 border-gray-200 rounded-xl py-2"
+                  />
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => setQuantity(quantity + 1)}
+                  >
+                    +
+                  </Button>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex justify-between mb-2">
+                <div className="mt-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
                     <span className="text-gray-600">Price per item:</span>
                     <span className="font-semibold">{asset.price} USDFC</span>
                   </div>
-                  <div className="flex justify-between mb-2">
+                  <div className="flex justify-between">
                     <span className="text-gray-600">Quantity:</span>
                     <span className="font-semibold">{quantity}</span>
                   </div>
@@ -182,7 +225,7 @@ export default function AssetDetailPage() {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 rounded-xl p-4 text-sm">
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm">
                   <p className="text-gray-700">
                     💰 Your Balance: <span className="font-bold">{balances?.usdfcBalanceFormatted.toFixed(2) || 0} USDFC</span>
                   </p>
@@ -190,99 +233,206 @@ export default function AssetDetailPage() {
                     <p className="text-red-600 mt-2">⚠️ Insufficient balance to purchase</p>
                   )}
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Show Buy button only if NOT purchased yet */}
-                {!hasPurchased && (
-                  <button
-                    onClick={() => setShowPurchaseModal(true)}
-                    disabled={!canAfford || !address}
-                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!canAfford || !address
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl"
-                      }`}
-                  >
-                    {!address ? "Connect Wallet" : !canAfford ? "Insufficient Balance" : `💳 Buy ${totalPrice} USDFC`}
-                  </button>
-                )}
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              {!hasPurchased && (
+                <Button
+                  onClick={() => setShowPurchaseModal(true)}
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  icon={<ShoppingCart className="w-5 h-5" />}
+                  disabled={!canAfford || !address}
+                >
+                  {!address ? "Connect Wallet" : !canAfford ? "Insufficient Balance" : `Buy for ${totalPrice} USDFC`}
+                </Button>
+              )}
 
-                {/* Show Mint button only AFTER purchase */}
-                {hasPurchased && (
-                  <button
+              {hasPurchased && (
+                <div className="space-y-2">
+                  <Alert variant="success" title="You own this asset!">
+                    You can now mint an NFT license or download the asset.
+                  </Alert>
+                  <Button
                     onClick={() => setShowMintModal(true)}
-                    disabled={!address}
-                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!address
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:shadow-xl"
-                      }`}
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
                   >
-                    🪙 Mint NFT License
-                  </button>
-                )}
-
-                {/* Info message: Must purchase before minting */}
-                {!hasPurchased && (
-                  <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl">
-                    <p className="text-sm font-semibold text-amber-800 mb-1 flex items-center gap-2">
-                      <span>💡</span>
-                      <span>NFT License Information</span>
-                    </p>
-                    <p className="text-xs text-amber-700">
-                      After purchasing this asset, you can mint an NFT license to verify your ownership on-chain. The Mint NFT button will appear after successful purchase.
-                    </p>
-                  </div>
-                )}
-
-                {/* Success badge if already purchased */}
-                {hasPurchased && (
-                  <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl">
-                    <p className="text-sm font-bold text-green-800 mb-1 flex items-center gap-2">
-                      <span>✅</span>
-                      <span>Asset Purchased!</span>
-                    </p>
-                    <p className="text-xs text-green-700">
-                      You own this asset. Click &quot;Mint NFT License&quot; to create an on-chain proof of ownership.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-xl p-6">
-              <h3 className="text-xl font-bold mb-4">Description</h3>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                {asset.description}
-              </p>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                This digital asset is permanently stored on the Filecoin blockchain, ensuring its authenticity and ownership.
-                Each piece is unique and comes with verifiable proof of ownership through blockchain technology.
-              </p>
-              <h3 className="text-xl font-bold mb-4 mt-6">Asset Information</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <span className="text-2xl">🔐</span>
-                  <div>
-                    <p className="font-semibold">Blockchain Storage</p>
-                    <p className="text-gray-600">Stored permanently on Filecoin</p>
-                  </div>
+                    🎨 Mint NFT License
+                  </Button>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <span className="text-2xl">✅</span>
-                  <div>
-                    <p className="font-semibold">Verified Ownership</p>
-                    <p className="text-gray-600">Proof of ownership on-chain</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <span className="text-2xl">⚡</span>
-                  <div>
-                    <p className="font-semibold">Instant Transfer</p>
-                    <p className="text-gray-600">Immediate ownership transfer</p>
-                  </div>
-                </div>
-              </div>
+              )}
+
+              {!hasPurchased && (
+                <Alert variant="info" title="NFT License Information">
+                  After purchasing this asset, you can mint an NFT license to verify your ownership on-chain.
+                </Alert>
+              )}
             </div>
           </motion.div>
         </div>
+
+        {/* Tabs Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-12"
+        >
+          <Tabs defaultValue="details">
+            <TabsList>
+              <TabsTrigger value="details" icon={<Info className="w-4 h-4" />}>
+                Details
+              </TabsTrigger>
+              <TabsTrigger value="history" icon={<History className="w-4 h-4" />}>
+                History
+              </TabsTrigger>
+              <TabsTrigger value="properties" icon={<Tag className="w-4 h-4" />}>
+                Properties
+              </TabsTrigger>
+              <TabsTrigger value="about" icon={<FileText className="w-4 h-4" />}>
+                About
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="details">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Asset Information</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Asset ID</p>
+                          <p className="font-mono text-sm bg-gray-100 px-3 py-2 rounded">
+                            {assetId}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Provider</p>
+                          <p className="font-mono text-sm bg-gray-100 px-3 py-2 rounded">
+                            {asset.provider}
+                          </p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <p className="text-sm text-gray-500 mb-1">Piece CID</p>
+                          <p className="font-mono text-xs bg-gray-100 px-3 py-2 rounded break-all">
+                            {asset.pieceCid}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Status</p>
+                          <Badge variant={asset.status === "Live" ? "live" : "inactive"}>
+                            {asset.status}
+                          </Badge>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Created</p>
+                          <p className="text-sm font-semibold">{asset.created}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="history">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Transaction History</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
+                        <Badge variant="success">Created</Badge>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">Asset created and uploaded</p>
+                          <p className="text-xs text-gray-500">Stored on Filecoin blockchain</p>
+                        </div>
+                      </div>
+                      {asset.status === "Live" && (
+                        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+                          <Badge variant="info">Listed</Badge>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">Listed for sale</p>
+                            <p className="text-xs text-gray-500">Price: {asset.price} USDFC</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="properties">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Properties</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div className="p-4 bg-indigo-50 rounded-lg text-center">
+                        <p className="text-xs text-indigo-600 font-semibold uppercase tracking-wide">Type</p>
+                        <p className="text-sm font-bold mt-1">{asset.category}</p>
+                      </div>
+                      <div className="p-4 bg-purple-50 rounded-lg text-center">
+                        <p className="text-xs text-purple-600 font-semibold uppercase tracking-wide">Blockchain</p>
+                        <p className="text-sm font-bold mt-1">Filecoin</p>
+                      </div>
+                      <div className="p-4 bg-pink-50 rounded-lg text-center">
+                        <p className="text-xs text-pink-600 font-semibold uppercase tracking-wide">Storage</p>
+                        <p className="text-sm font-bold mt-1">Permanent</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="about">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">About This Asset</h3>
+                    <div className="prose max-w-none">
+                      <p className="text-gray-700 leading-relaxed">
+                        {asset.description}
+                      </p>
+                      <p className="text-gray-700 leading-relaxed mt-4">
+                        This digital asset is permanently stored on the Filecoin blockchain, ensuring its authenticity and ownership.
+                        Each piece is unique and comes with verifiable proof of ownership through blockchain technology.
+                      </p>
+                    </div>
+
+                    {creator && percentage && (
+                      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <h4 className="font-semibold mb-2">Creator Information</h4>
+                        <div className="flex items-center gap-3">
+                          <Avatar
+                            fallback={creator.slice(0, 2).toUpperCase()}
+                            size="md"
+                          />
+                          <div>
+                            <p className="font-medium">
+                              {creator.slice(0, 6)}...{creator.slice(-4)}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              Receives {(Number(percentage) / 100).toFixed(1)}% royalty on sales
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
       </div>
 
       <NFTMintModal

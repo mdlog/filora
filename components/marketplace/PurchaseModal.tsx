@@ -249,19 +249,27 @@ export const PurchaseModal = ({ isOpen, onClose, assetId, pieceId, pieceCid, ass
                 <div className="space-y-2 text-xs text-amber-700">
                   <div className="flex items-start gap-2">
                     <span className="font-bold">1️⃣</span>
-                    <span>Confirm <strong>first MetaMask popup</strong> (Approve USDFC spending)</span>
+                    <span>Confirm <strong>FIRST MetaMask popup</strong> (Approve USDFC spending)</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="font-bold">⏰</span>
-                    <span>Wait ~5-10 seconds for blockchain confirmation</span>
+                    <span>Wait for approval to be <strong>confirmed on blockchain</strong> (10-30 seconds)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-bold">✅</span>
+                    <span>After approval confirmed, <strong>SECOND popup will appear automatically</strong></span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="font-bold">2️⃣</span>
-                    <span>Confirm <strong>second MetaMask popup</strong> (Process payment)</span>
+                    <span>Confirm <strong>SECOND MetaMask popup</strong> (Process payment)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="font-bold">⏰</span>
+                    <span>Wait for payment to be <strong>confirmed on blockchain</strong> (10-30 seconds)</span>
                   </div>
                   <div className="flex items-start gap-2 mt-2 pt-2 border-t border-amber-200">
                     <span className="font-bold">⚠️</span>
-                    <span><strong>IMPORTANT:</strong> Do NOT close this window or browser!</span>
+                    <span><strong>IMPORTANT:</strong> Do NOT close this window! Check console (F12) for progress.</span>
                   </div>
                 </div>
               </div>
